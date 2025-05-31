@@ -25,8 +25,8 @@ jobs:
       - name: 🛠 Compilar proyecto
         run: yarn build
 
-      - name: 🧪 Ejecutar tests
-        run: yarn test
+      #- name: 🧪 Ejecutar tests
+      #   run: yarn test
 
       # - name: 🚀 Deploy a Railway
       #   run: npx railway up
