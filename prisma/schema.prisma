@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EstadoAuto {
+  DISPONIBLE
+  RESERVADO
+  VENDIDO
+  POR_INGRESAR
+}
+
+enum Transmision {
+  MANUAL
+  AUTOMATICA
+}
+
+enum Color {
+  BLANCO
+  NEGRO
+  GRIS
+  ROJO
+  AZUL
+  VERDE
+  AMARILLO
+  OTRO
+}
+
+model Auto {
+  id                        String   @id @default(uuid())
+  nombre                    String
+  descripcion               String
+  observaciones             String
+  matricula                 String   @unique
+  marca                     String
+  modelo                    String
+  version                   String
+  ano                       Int
+  kilometraje               Int
+  precio                    Int
+  costo                     Int
+  color                     Color @default(BLANCO)
+  transmision               Transmision @default(MANUAL)
+  estado                    EstadoAuto @default(DISPONIBLE)
+  imagenes                  String[] // Array de URLs
+  equipamientoDestacado     String[]
+  caracteristicasGenerales  String[]
+  exterior                  String[]
+  confort                   String[]
+  seguridad                 String[]
+  interior                  String[]
+  entretenimiento           String[]
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+  createdBy                 String
+  updatedBy                 String
+  active                    Boolean  @default(true)
+}
+
+
