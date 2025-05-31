@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Clonar repositorio
+        uses: actions/checkout@v3
+
+      - name: 🟢 Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.16.0
+
+      - name: 📦 Instalar dependencias
+        run: yarn install
+
+      - name: 🛠 Compilar proyecto
+        run: yarn build
+
+      - name: 🧪 Ejecutar tests
+        run: yarn test
+
+      # - name: 🚀 Deploy a Railway
+      #   run: npx railway up
+      #   env:
+      #     RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
