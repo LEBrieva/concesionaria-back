@@ -3,6 +3,10 @@
 Backend para una aplicación de concesionarias de autos.
 Construido con [NestJS](https://nestjs.com/), [Prisma](https://www.prisma.io/) y PostgreSQL.
 
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+
+---
+
 ## 🛠 Tech Stack
 
 - Node.js + NestJS
@@ -120,4 +124,4 @@ git checkout -b feature/nueva-funcionalidad develop
 
 ## 📝 Licencia
 
-MIT
+Este proyecto está licenciado bajo los términos de la licencia MIT. Ver el archivo `LICENSE` para más información.
