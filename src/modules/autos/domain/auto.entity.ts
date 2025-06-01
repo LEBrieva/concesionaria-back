@@ -1,9 +1,11 @@
-import { BaseEntity } from '@shared/entities/base.entity';
+import { BaseEntity } from 'src/modules/shared/entities/base.entity';
 import { Color, EstadoAuto, Transmision } from './auto.enum';
 import { AutoProps } from './auto.interfaces';
-import { BaseProps } from '@shared/interfaces/base-props.interface';
+import { BaseProps } from 'src/modules/shared/interfaces/base-props.interface';
 
 export class Auto extends BaseEntity {
+  private readonly props: AutoProps;
+
   public readonly nombre: string;
   public readonly descripcion: string;
   public readonly observaciones: string;
@@ -53,6 +55,8 @@ export class Auto extends BaseEntity {
       entretenimiento,
     } = props;
     super(props);
+    this.props = props;
+
     this.nombre = nombre;
     this.descripcion = descripcion;
     this.observaciones = observaciones;
@@ -84,5 +88,13 @@ export class Auto extends BaseEntity {
     if (!matricula || matricula.trim() === '') {
       throw new Error('La matrícula es obligatoria');
     }
+  }
+
+  actualizarCon(props: Partial<AutoProps>): Auto {
+    return new Auto({
+      ...this.props,
+      ...props,
+      updatedAt: new Date(), // si querés actualizar la fecha automáticamente
+    });
   }
 }
