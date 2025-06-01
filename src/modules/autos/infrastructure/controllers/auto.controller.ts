@@ -10,7 +10,7 @@ import { ActualizarAutoUseCase } from '@autos/application/use-cases/autos/actual
 export class AutoController {
   constructor(
     private readonly crearAutoUseCase: CrearAutoUseCase,
-    private readonly actualizarAutoUseCase: ActualizarAutoUseCase, // Asumiendo que usarás el mismo caso de uso para actualizar
+    private readonly actualizarAutoUseCase: ActualizarAutoUseCase,
   ) {}
 
   @Post()

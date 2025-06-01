@@ -1,7 +1,7 @@
 import { Auto } from '@autos/domain/auto.entity';
 import { IAutoRepository } from '@autos/domain/auto.repository';
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/modules/shared/prisma.service'; // lo creamos luego
+import { PrismaService } from 'src/modules/shared/prisma.service';
 import { AutoPrismaMapper } from '../mappers/auto-to-prisma.mapper';
 
 @Injectable()

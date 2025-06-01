@@ -5,6 +5,7 @@ export class AutoMapper {
   static toHttp(auto: Auto): AutoResponseDTO {
     return {
       id: auto.id,
+      nombre: auto.nombre,
       marca: auto.marca,
       modelo: auto.modelo,
       precio: auto.precio,

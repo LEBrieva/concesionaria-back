@@ -3,7 +3,6 @@ import { Auto } from '@autos/domain/auto.entity';
 import { IAutoRepository } from '@autos/domain/auto.repository';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 
-// src/modules/autos/application/use-cases/autos/actualizar-auto.use-case.ts
 @Injectable()
 export class ActualizarAutoUseCase {
   constructor(
