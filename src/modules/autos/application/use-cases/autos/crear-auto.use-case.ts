@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Auto } from '../../../domain/auto.entity';
 import { v4 as uuidv4 } from 'uuid';
-import { CrearAutoDTO } from '@autos/application/dtos/autos/crear/crear-auto.dto';
+import { CrearAutoDTO } from '@autos/infrastructure/presentation/dtos/autos/crear/crear-auto.dto';
 import { IAutoRepository } from '@autos/domain/auto.repository';
 
 @Injectable()
