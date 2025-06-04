@@ -12,7 +12,7 @@
     "baseUrl": "./",
     "paths": {
       "@autos/*": ["src/modules/autos/*"],
-      "@shared/*": ["src/shared/*"],
+      "@shared/*": ["src/modules/shared/*"],
       "@config/*": ["src/config/*"]
     },
     "incremental": true,

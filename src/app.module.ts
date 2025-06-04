@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppService } from './app.service';
-import { PrismaService } from './shared/prisma.service';
-import { AutosModule } from './modules/autos/auto.module';
+import { PrismaService } from './modules/shared/prisma.service';
+import { AutosModule } from './modules/autos/autos.module';
 
 @Module({
   imports: [AutosModule],

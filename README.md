@@ -95,6 +95,19 @@ git checkout -b feature/nueva-funcionalidad develop
 
 > El despliegue a producción solo ocurre cuando `develop` se mergea a `main` y se genera un tag (`v1.0.0`, etc).
 
+## 🧪 CI con GitHub Actions
+
+El proyecto cuenta con integración continua usando GitHub Actions.
+Cada vez que se hace push o PR a `main`, se ejecuta el workflow de CI:
+
+- ✅ Instalación de dependencias
+- ✅ Compilación del proyecto
+- ✅ Ejecución de tests
+
+Podés ver el archivo en `.github/workflows/ci.yml`.
+
+> ⚠️ `main` está protegido: solo se puede hacer merge si los checks de CI pasan correctamente.
+
 ## 🧪 Comandos útiles
 
 - Levantar en desarrollo:
