@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Auto } from '../../../domain/auto.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { CrearAutoDTO } from '@autos/application/dtos/autos/crear/crear-auto.dto';
@@ -11,16 +11,20 @@ export class CrearAutoUseCase {
   ) {}
 
   async execute(dto: CrearAutoDTO): Promise<Auto> {
-    //TODO: Cambiar por id de usuario autenticado
-    const auto = new Auto({
-      ...dto,
-      id: uuidv4(),
-      createdBy: 'admin',
-      updatedBy: 'admin',
-    });
-
-    await this.autoRepo.save(auto);
-
-    return auto;
+    try {
+      const auto = new Auto({
+        ...dto,
+        id: uuidv4(),
+        createdBy: 'admin',
+        updatedBy: 'admin',
+      });
+      await this.autoRepo.save(auto);
+      return auto;
+    } catch (error) {
+      const msg = Array.isArray(error.message)
+        ? error.message
+        : [error.message];
+      throw new BadRequestException(msg);
+    }
   }
 }

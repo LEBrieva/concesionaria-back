@@ -41,9 +41,11 @@ export class CrearAutoDTO {
   kilometraje: number;
 
   @IsInt()
+  @Min(0)
   precio: number;
 
   @IsInt()
+  @Min(0)
   costo: number;
 
   @IsEnum(Color)
