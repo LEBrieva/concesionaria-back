@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { validCar, invalidCars } from './test-data/autos.data';
 import { AppModule } from '../../src/app.module';
+import { AllExceptionsFilter } from '../../src/modules/shared/filters/all-exceptions.filter';
 
 describe('AutosController (e2e)', () => {
   let app: INestApplication;
@@ -14,6 +15,7 @@ describe('AutosController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+    app.useGlobalFilters(new AllExceptionsFilter());
     await app.init();
   });
 
@@ -82,5 +84,22 @@ describe('AutosController (e2e)', () => {
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty('id');
     expect(response.body.precio).toBe(0);
+  });
+
+  it('debería devolver error 409 si la matrícula ya existe', async () => {
+    // Crear el primer auto
+    await request(app.getHttpServer())
+      .post('/autos')
+      .send(validCar);
+
+    // Intentar crear otro auto con la misma matrícula
+    const response = await request(app.getHttpServer())
+      .post('/autos')
+      .send(validCar);
+
+    expect(response.status).toBe(409);
+    expect(response.body.statusCode).toBe(409);
+    expect(response.body.message).toBe('La matrícula ya existe en el sistema.');
+    expect(response.body.error).toBe('Conflict');
   });
 });

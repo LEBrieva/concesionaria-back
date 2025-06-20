@@ -30,4 +30,9 @@ export class PrismaAutoRepository implements IAutoRepository {
     const data = await this.prisma.auto.findMany();
     return data.map(AutoPrismaMapper.toDomain);
   }
+
+  async findByMatricula(matricula: string): Promise<Auto | null> {
+    const data = await this.prisma.auto.findUnique({ where: { matricula } });
+    return data ? AutoPrismaMapper.toDomain(data) : null;
+  }
 }

@@ -8,11 +8,13 @@ import {
   ArrayNotEmpty,
   IsEnum,
   Max,
+  Length,
 } from 'class-validator';
 
 export class CrearAutoDTO {
   @IsString()
   @IsNotEmpty()
+  @Length(1, 100)
   nombre: string;
 
   @IsString()
