@@ -11,20 +11,14 @@ export class CrearAutoUseCase {
   ) {}
 
   async execute(dto: CrearAutoDTO): Promise<Auto> {
-    try {
-      const auto = new Auto({
-        ...dto,
-        id: uuidv4(),
-        createdBy: 'admin',
-        updatedBy: 'admin',
-      });
-      await this.autoRepo.save(auto);
-      return auto;
-    } catch (error) {
-      const msg = Array.isArray(error.message)
-        ? error.message
-        : [error.message];
-      throw new BadRequestException(msg);
-    }
+    const auto = new Auto({
+      ...dto,
+      id: uuidv4(),
+      createdBy: 'admin',
+      updatedBy: 'admin',
+    });
+    
+    await this.autoRepo.save(auto);
+    return auto;
   }
 }

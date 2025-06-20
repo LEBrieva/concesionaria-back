@@ -30,13 +30,62 @@ enum Color {
   OTRO
 }
 
+enum Marca {
+  TOYOTA
+  HONDA
+  FORD
+  CHEVROLET
+  NISSAN
+  HYUNDAI
+  KIA
+  MAZDA
+  SUBARU
+  MITSUBISHI
+  SUZUKI
+  VOLKSWAGEN
+  BMW
+  MERCEDES_BENZ
+  AUDI
+  LEXUS
+  ACURA
+  INFINITI
+  VOLVO
+  JEEP
+  DODGE
+  CHRYSLER
+  CADILLAC
+  BUICK
+  GMC
+  LINCOLN
+  JAGUAR
+  LAND_ROVER
+  PORSCHE
+  FERRARI
+  LAMBORGHINI
+  MASERATI
+  BENTLEY
+  ROLLS_ROYCE
+  TESLA
+  PEUGEOT
+  RENAULT
+  CITROEN
+  FIAT
+  ALFA_ROMEO
+  SKODA
+  SEAT
+  OPEL
+  MINI
+  SMART
+  OTRO
+}
+
 model Auto {
   id                        String   @id @default(uuid())
   nombre                    String
   descripcion               String
   observaciones             String
   matricula                 String   @unique
-  marca                     String
+  marca                     Marca
   modelo                    String
   version                   String
   ano                       Int
