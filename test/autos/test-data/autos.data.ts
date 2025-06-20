@@ -1,11 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
+import { Marca } from '../../../src/modules/autos/domain/auto.enum';
 
 export const validCar = {
   nombre: 'Toyota Corolla',
   descripcion: 'Sedán compacto',
   observaciones: 'En excelente estado',
   matricula: `TEST-${uuidv4()}`,
-  marca: 'Toyota',
+  marca: Marca.TOYOTA,
   modelo: 'Corolla',
   version: 'XLI',
   ano: 2022, // Confirmado que está correcto
@@ -27,7 +28,7 @@ export const validCar = {
 
 export const invalidCars = {
   missingFields: {
-    marca: 'Toyota',
+    marca: Marca.TOYOTA,
   },
   negativePrice: {
     ...validCar,

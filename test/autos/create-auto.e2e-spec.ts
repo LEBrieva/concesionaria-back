@@ -59,7 +59,7 @@ describe('AutosController (e2e)', () => {
 
     expect(response.status).toBe(400);
     expect(response.body.message).toEqual(
-      expect.arrayContaining([expect.stringContaining('año')]),
+      expect.arrayContaining([expect.stringContaining('ano')]),
     );
   });
 
