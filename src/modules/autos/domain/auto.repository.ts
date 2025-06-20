@@ -5,4 +5,5 @@ export interface IAutoRepository {
   update(id: string, auto: Auto): Promise<void>;
   findById(id: string): Promise<Auto | null>;
   findAll(): Promise<Auto[]>;
+  findByMatricula(matricula: string): Promise<Auto | null>;
 }

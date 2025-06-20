@@ -1,5 +1,5 @@
 import { BaseEntity } from 'src/modules/shared/entities/base.entity';
-import { Color, EstadoAuto, Transmision } from './auto.enum';
+import { Color, EstadoAuto, Transmision, Marca } from './auto.enum';
 import { AutoProps } from './auto.interfaces';
 import { BaseProps } from 'src/modules/shared/interfaces/base-props.interface';
 
@@ -10,7 +10,7 @@ export class Auto extends BaseEntity {
   public readonly descripcion: string;
   public readonly observaciones: string;
   public readonly matricula: string;
-  public readonly marca: string;
+  public readonly marca: Marca;
   public readonly modelo: string;
   public readonly version: string;
   public readonly ano: number;

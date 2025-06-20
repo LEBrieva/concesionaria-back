@@ -1,4 +1,4 @@
-import { Color, EstadoAuto, Transmision } from '@autos/domain/auto.enum';
+import { Color, EstadoAuto, Transmision, Marca } from '@autos/domain/auto.enum';
 import {
   IsString,
   IsNotEmpty,
@@ -7,11 +7,14 @@ import {
   IsArray,
   ArrayNotEmpty,
   IsEnum,
+  Max,
+  Length,
 } from 'class-validator';
 
 export class CrearAutoDTO {
   @IsString()
   @IsNotEmpty()
+  @Length(1, 100)
   nombre: string;
 
   @IsString()
@@ -24,8 +27,8 @@ export class CrearAutoDTO {
   @IsNotEmpty()
   matricula: string;
 
-  @IsString()
-  marca: string;
+  @IsEnum(Marca)
+  marca: Marca;
 
   @IsString()
   modelo: string;
@@ -35,9 +38,11 @@ export class CrearAutoDTO {
 
   @IsInt()
   @Min(1900)
+  @Max(new Date().getFullYear())
   ano: number;
 
   @IsInt()
+  @Min(0)
   kilometraje: number;
 
   @IsInt()

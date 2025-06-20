@@ -1,6 +1,6 @@
 import { Auto } from '@autos/domain/auto.entity';
 import { Auto as PrismaAuto } from '@prisma/client';
-import { EstadoAuto, Transmision, Color } from '@autos/domain/auto.enum';
+import { EstadoAuto, Transmision, Color, Marca } from '@autos/domain/auto.enum';
 import { AutoProps } from '@autos/domain/auto.interfaces';
 
 export class AutoPrismaMapper {
@@ -44,7 +44,7 @@ export class AutoPrismaMapper {
       descripcion: data.descripcion,
       observaciones: data.observaciones,
       matricula: data.matricula,
-      marca: data.marca,
+      marca: data.marca as Marca,
       modelo: data.modelo,
       version: data.version,
       ano: data.ano,

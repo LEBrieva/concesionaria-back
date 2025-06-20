@@ -108,24 +108,45 @@ Podés ver el archivo en `.github/workflows/ci.yml`.
 
 > ⚠️ `main` está protegido: solo se puede hacer merge si los checks de CI pasan correctamente.
 
+## 🧪 Tests
+
+El proyecto utiliza **Jest** para las pruebas. Actualmente se implementan pruebas **end-to-end (e2e)** que verifican la funcionalidad completa de la API.
+
+### Ejecutar pruebas
+
+- **Pruebas E2E** (recomendado):
+
+  ```bash
+  yarn test:e2e
+  ```
+
+- **Pruebas unitarias** (aún no implementadas):
+
+  ```bash
+  yarn test
+  ```
+
+- **Ver cobertura**:
+
+  ```bash
+  yarn test:cov
+  ```
+
+### Pruebas implementadas
+
+- ✅ **Creación de autos**: Validación de DTOs, enums y persistencia
+- ✅ **Validaciones de campos**: Campos requeridos, tipos de datos, rangos
+- ✅ **Enum Marca**: Validación de marcas de vehículos permitidas
+- ✅ **Casos edge**: Precios negativos, años futuros, kilometraje inválido
+
+> **Nota**: Las pruebas E2E requieren que la base de datos esté funcionando. Asegúrate de tener Docker corriendo con `docker-compose up -d`.
+
 ## 🧪 Comandos útiles
 
 - Levantar en desarrollo:
 
   ```bash
   yarn start:dev
-  ```
-
-- Ejecutar tests:
-
-  ```bash
-  yarn test
-  ```
-
-- Ver cobertura:
-
-  ```bash
-  yarn test:cov
   ```
 
 ## 📚 Recursos
