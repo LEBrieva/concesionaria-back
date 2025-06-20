@@ -211,6 +211,8 @@ El proyecto utiliza **Jest** para las pruebas. Actualmente se implementan prueba
 - [Prisma Studio](https://www.prisma.io/studio)
 - [Yarn](https://classic.yarnpkg.com/en/docs/)
 
+Test
+
 ## 📝 Licencia
 
 Este proyecto está licenciado bajo los términos de la licencia MIT. Ver el archivo `LICENSE` para más información.
