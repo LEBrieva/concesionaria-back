@@ -43,18 +43,47 @@ Construido con [NestJS](https://nestjs.com/), [Prisma](https://www.prisma.io/) y
 
    > Si obtienes un error sobre versiones de Yarn, asegúrate de haber ejecutado `corepack enable` primero.
 
-## 🐘 Levantar base de datos con Docker
+## 🗄️ Base de datos
+
+Este proyecto utiliza **Neon PostgreSQL** como base de datos en la nube, por lo que no es necesario levantar una base de datos local con Docker.
+
+1. **Solicita la cadena de conexión al administrador del proyecto**
+2. Crea un archivo `.env` en la raíz del proyecto:
+
+```bash
+# .env
+DATABASE_URL="postgresql://username:password@host.neon.tech/database?sslmode=require"
+```
+
+> ⚠️ **IMPORTANTE**: La `DATABASE_URL` es sensible y debe solicitarse al administrador del proyecto. No se incluye en el repositorio por seguridad.
+
+### Docker (opcional para desarrollo local)
+
+Si prefieres usar una base de datos local para desarrollo:
 
 ```bash
 docker-compose up -d
 ```
 
-Esto levantará la base de datos definida en el archivo `docker-compose.yml`.
-Asegúrate de que las variables de entorno en `.env` coincidan con esta configuración.
+> **Nota**: Asegúrate de cambiar la `DATABASE_URL` en `.env` para apuntar a la base local si usas Docker.
 
-## ⚙️ Configuración de variables de entorno
+### Configuración inicial
 
-Copia el archivo `.env.template` a `.env` y ajusta los valores según tu entorno:
+Una vez que tengas configurada la `DATABASE_URL` en tu archivo `.env`:
+
+1. **Aplicar migraciones**:
+   ```bash
+   npx prisma migrate deploy
+   ```
+
+2. **Generar cliente de Prisma**:
+   ```bash
+   npx prisma generate
+   ```
+
+### Variables adicionales
+
+Si existe un archivo `.env.template`, puedes usarlo como referencia:
 
 ```bash
 cp .env.template .env
