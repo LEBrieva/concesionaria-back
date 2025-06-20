@@ -14,7 +14,7 @@ Construido con [NestJS](https://nestjs.com/), [Prisma](https://www.prisma.io/) y
 - PostgreSQL
 - Docker (para la base de datos)
 - Arquitectura DDD (Domain-Driven Design)
-- Yarn como gestor de paquetes
+- Yarn 4.9.2 como gestor de paquetes (gestionado con Corepack)
 
 ## 🚀 Instalación
 
@@ -25,11 +25,23 @@ Construido con [NestJS](https://nestjs.com/), [Prisma](https://www.prisma.io/) y
    cd concesionaria-back
    ```
 
-2. Instalar dependencias:
+2. **⚠️ IMPORTANTE - Habilitar Corepack (REQUERIDO):**
+
+   Este proyecto usa Yarn 4.9.2 específicamente. Antes de instalar dependencias, **debes habilitar Corepack** para que use la versión correcta automáticamente:
+
+   ```bash
+   corepack enable
+   ```
+
+   > **¿Qué es Corepack?** Es una herramienta oficial de Node.js que garantiza que todos usen la misma versión de Yarn, ignorando versiones globales. Solo necesitas ejecutar este comando **una vez** en tu máquina.
+
+3. Instalar dependencias:
 
    ```bash
    yarn install
    ```
+
+   > Si obtienes un error sobre versiones de Yarn, asegúrate de haber ejecutado `corepack enable` primero.
 
 ## 🐘 Levantar base de datos con Docker
 
