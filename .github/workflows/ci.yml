@@ -20,6 +20,9 @@ jobs:
         with:
           node-version: 20.16.0
 
+      - name: 🔧 Habilitar Corepack
+        run: corepack enable
+
       - name: 📦 Instalar dependencias
         run: yarn install
 
