@@ -11,7 +11,7 @@ export class ActualizarPasswordUseCase {
     private readonly passwordService: PasswordService,
   ) {}
 
-  async ejecutar(usuarioId: string, dto: ActualizarPasswordDto): Promise<Usuario> {
+  async ejecutar(usuarioId: string, dto: ActualizarPasswordDto, updatedBy: string): Promise<Usuario> {
     // Obtener el usuario
     const usuario = await this.usuarioRepository.obtenerPorId(usuarioId);
     if (!usuario) {
@@ -34,7 +34,7 @@ export class ActualizarPasswordUseCase {
     // Actualizar el usuario con la nueva contraseña
     const usuarioActualizado = usuario.actualizarCon({
       password: hashedNewPassword,
-      updatedBy: 'system', // Por ahora hardcodeado
+      updatedBy: updatedBy,
     });
 
     return await this.usuarioRepository.actualizar(usuarioId, usuarioActualizado);

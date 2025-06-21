@@ -9,11 +9,11 @@ export class ActualizarAutoUseCase {
     @Inject('IAutoRepository') private readonly autoRepo: IAutoRepository,
   ) {}
 
-  async execute(id: string, dto: ActualizarAutoDTO): Promise<Auto> {
+  async execute(id: string, dto: ActualizarAutoDTO, userId: string): Promise<Auto> {
     const auto = await this.autoRepo.findById(id);
     if (!auto) throw new NotFoundException('Auto no encontrado');
 
-    const updatedAuto = auto.actualizarCon(dto); // si usás un método en la entidad
+    const updatedAuto = auto.actualizarCon({ ...dto, updatedBy: userId }); // si usás un método en la entidad
     await this.autoRepo.update(id, updatedAuto);
 
     return updatedAuto;

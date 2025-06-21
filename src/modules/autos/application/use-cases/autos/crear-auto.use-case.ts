@@ -10,12 +10,12 @@ export class CrearAutoUseCase {
     @Inject('IAutoRepository') private readonly autoRepo: IAutoRepository,
   ) {}
 
-  async execute(dto: CrearAutoDTO): Promise<Auto> {
+  async execute(dto: CrearAutoDTO, userId: string): Promise<Auto> {
     const auto = new Auto({
       ...dto,
       id: uuidv4(),
-      createdBy: 'admin',
-      updatedBy: 'admin',
+      createdBy: userId,
+      updatedBy: userId,
     });
     
     await this.autoRepo.save(auto);
