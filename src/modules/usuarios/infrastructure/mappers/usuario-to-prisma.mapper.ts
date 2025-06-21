@@ -1,5 +1,6 @@
-import { Usuario as PrismaUsuario } from '@prisma/client';
+import { Usuario as PrismaUsuario, RolUsuario as PrismaRolUsuario } from '@prisma/client';
 import { Usuario } from '../../domain/usuario.entity';
+import { RolUsuario } from '../../domain/usuario.enum';
 
 export class UsuarioToPrismaMapper {
   static toPrisma(usuario: Usuario): Omit<PrismaUsuario, 'id'> {
@@ -9,6 +10,7 @@ export class UsuarioToPrismaMapper {
       email: usuario.email,
       password: usuario.password,
       telefono: usuario.telefono || null,
+      rol: usuario.rol as PrismaRolUsuario, // Conversión explícita entre enums compatibles
       createdAt: usuario.createdAt,
       updatedAt: usuario.updatedAt,
       createdBy: usuario.createdBy || 'system',
@@ -25,6 +27,7 @@ export class UsuarioToPrismaMapper {
       email: prismaUsuario.email,
       password: prismaUsuario.password,
       telefono: prismaUsuario.telefono || undefined,
+      rol: prismaUsuario.rol as RolUsuario, // Conversión explícita entre enums compatibles
       createdAt: prismaUsuario.createdAt,
       updatedAt: prismaUsuario.updatedAt,
       createdBy: prismaUsuario.createdBy,

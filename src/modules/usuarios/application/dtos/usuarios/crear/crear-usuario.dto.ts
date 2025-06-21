@@ -1,4 +1,5 @@
-import { IsString, IsEmail, IsOptional, IsNotEmpty, MinLength } from 'class-validator';
+import { IsString, IsEmail, IsOptional, IsNotEmpty, MinLength, IsEnum } from 'class-validator';
+import { RolUsuario } from 'src/modules/usuarios/domain/usuario.enum';
 
 export class CrearUsuarioDto {
   @IsString()
@@ -21,4 +22,8 @@ export class CrearUsuarioDto {
   @IsString()
   @IsOptional()
   telefono?: string;
+
+  @IsEnum(RolUsuario, { message: 'El rol debe ser ADMIN, VENDEDOR o CLIENTE' })
+  @IsOptional()
+  rol?: RolUsuario = RolUsuario.CLIENTE;
 } 

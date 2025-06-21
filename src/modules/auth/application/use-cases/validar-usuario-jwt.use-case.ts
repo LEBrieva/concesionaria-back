@@ -30,6 +30,7 @@ export class ValidarUsuarioJwtUseCase {
       id: usuario.id,
       email: usuario.email,
       nombre: usuario.nombre,
+      rol: usuario.rol,
     };
   }
 } 

@@ -9,6 +9,7 @@ export class UsuarioToHttpMapper {
       apellido: usuario.apellido,
       email: usuario.email,
       telefono: usuario.telefono,
+      rol: usuario.rol,
       active: usuario.active,
     };
   }
