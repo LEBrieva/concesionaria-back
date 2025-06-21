@@ -8,8 +8,11 @@ import { ActualizarPasswordUseCase } from '../../application/use-cases/usuarios/
 import { ActualizarUsuarioUseCase } from '../../application/use-cases/usuarios/actualizar-usuario.use-case';
 import { UsuarioToHttpMapper } from '../../application/mappers/usuario-to-http.mapper';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../auth/infrastructure/guards/roles.guard';
+import { Roles } from '../../../auth/infrastructure/decorators/roles.decorator';
 import { CurrentUser } from '../../../auth/infrastructure/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../../../auth/domain/interfaces/authenticated-user.interface';
+import { RolUsuario } from '../../domain/usuario.enum';
 
 @Controller('usuarios')
 export class UsuarioController {
@@ -19,13 +22,27 @@ export class UsuarioController {
     private readonly actualizarUsuarioUseCase: ActualizarUsuarioUseCase,
   ) {}
 
+  // Endpoint público para registro de clientes (sin autenticación)
   @Post()
   async crear(@Body() dto: CrearUsuarioDto): Promise<CrearUsuarioResponseDto> {
     const usuario = await this.crearUsuarioUseCase.ejecutar(dto);
     return UsuarioToHttpMapper.toCrearUsuarioResponse(usuario);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // Endpoint protegido para que solo ADMIN y VENDEDOR creen usuarios
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR) // Solo ADMIN y VENDEDOR
+  @Post('admin')
+  async crearConRoles(
+    @Body() dto: CrearUsuarioDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<CrearUsuarioResponseDto> {
+    const usuario = await this.crearUsuarioUseCase.ejecutar(dto, user);
+    return UsuarioToHttpMapper.toCrearUsuarioResponse(usuario);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR) // Solo ADMIN y VENDEDOR pueden cambiar contraseñas de otros
   @Put(':id/password')
   async actualizarPassword(
     @Param('id') id: string,
@@ -36,7 +53,8 @@ export class UsuarioController {
     return { message: 'Contraseña actualizada exitosamente' };
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR) // Solo ADMIN y VENDEDOR pueden actualizar otros usuarios
   @Put(':id')
   async actualizar(
     @Param('id') id: string,
