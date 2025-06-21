@@ -30,6 +30,12 @@ enum Color {
   OTRO
 }
 
+enum RolUsuario {
+  ADMIN
+  VENDEDOR
+  CLIENTE
+}
+
 enum Marca {
   TOYOTA
   HONDA
@@ -117,6 +123,7 @@ model Usuario {
   email     String   @unique
   password  String
   telefono  String?
+  rol       RolUsuario  @default(CLIENTE)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   createdBy String

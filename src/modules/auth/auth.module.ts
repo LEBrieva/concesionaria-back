@@ -5,6 +5,7 @@ import { AuthService } from './application/services/auth.service';
 import { AuthController } from './infrastructure/controllers/auth.controller';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
 import { LocalStrategy } from './infrastructure/strategies/local.strategy';
+import { RolesGuard } from './infrastructure/guards/roles.guard';
 import { ValidarUsuarioJwtUseCase } from './application/use-cases/validar-usuario-jwt.use-case';
 import { UsuariosModule } from '../usuarios/usuarios.module';
 import { SharedModule } from '../shared/shared.module';
@@ -20,7 +21,7 @@ import { SharedModule } from '../shared/shared.module';
     SharedModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, LocalStrategy, ValidarUsuarioJwtUseCase],
-  exports: [AuthService],
+  providers: [AuthService, JwtStrategy, LocalStrategy, RolesGuard, ValidarUsuarioJwtUseCase],
+  exports: [AuthService, RolesGuard],
 })
 export class AuthModule {} 

@@ -1,5 +1,6 @@
 import { BaseEntity } from 'src/modules/shared/entities/base.entity';
 import { UsuarioProps } from './usuario.interfaces';
+import { RolUsuario } from './usuario.enum';
 
 export class Usuario extends BaseEntity {
   private readonly props: UsuarioProps;
@@ -9,9 +10,10 @@ export class Usuario extends BaseEntity {
   public readonly email: string;
   public readonly password: string;
   public readonly telefono?: string;
+  public readonly rol: RolUsuario;
 
   constructor(props: UsuarioProps) {
-    const { nombre, apellido, email, password, telefono } = props;
+    const { nombre, apellido, email, password, telefono, rol } = props;
     super(props);
     this.props = props;
 
@@ -20,6 +22,7 @@ export class Usuario extends BaseEntity {
     this.email = email;
     this.password = password;
     this.telefono = telefono;
+    this.rol = rol;
 
     this.validarDominio();
   }
@@ -48,6 +51,10 @@ export class Usuario extends BaseEntity {
 
     if (this.password.length < 8) {
       throw new Error('La contraseña debe tener al menos 8 caracteres');
+    }
+
+    if (!this.rol || !Object.values(RolUsuario).includes(this.rol)) {
+      throw new Error('El rol del usuario es requerido y debe ser válido');
     }
   }
 
