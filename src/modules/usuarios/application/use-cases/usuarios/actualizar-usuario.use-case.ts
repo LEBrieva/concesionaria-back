@@ -1,13 +1,13 @@
 import { ActualizarUsuarioDto } from '../../dtos/usuarios/actualizar/actualizar-usuario.dto';
 import { Usuario } from '../../../domain/usuario.entity';
 import { UsuarioRepository } from '../../../domain/usuario.repository';
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PasswordService } from '../../../../shared/services/password.service';
 
 @Injectable()
 export class ActualizarUsuarioUseCase {
   constructor(
-    @Inject('UsuarioRepository') private readonly usuarioRepo: UsuarioRepository,
+    private readonly usuarioRepo: UsuarioRepository,
     private readonly passwordService: PasswordService,
   ) {}
 
