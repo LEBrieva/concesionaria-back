@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { UsuarioController } from './infrastructure/controllers/usuario.controller';
 import { CrearUsuarioUseCase } from './application/use-cases/usuarios/crear-usuario.use-case';
+import { ActualizarPasswordUseCase } from './application/use-cases/usuarios/actualizar-password.use-case';
 import { UsuarioRepository } from './domain/usuario.repository';
 import { PrismaUsuarioRepository } from './infrastructure/prisma/prisma-usuario.repository';
 import { SharedModule } from '../shared/shared.module';
@@ -10,6 +11,7 @@ import { SharedModule } from '../shared/shared.module';
   controllers: [UsuarioController],
   providers: [
     CrearUsuarioUseCase,
+    ActualizarPasswordUseCase,
     {
       provide: UsuarioRepository,
       useClass: PrismaUsuarioRepository,

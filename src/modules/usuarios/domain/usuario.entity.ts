@@ -7,16 +7,18 @@ export class Usuario extends BaseEntity {
   public readonly nombre: string;
   public readonly apellido: string;
   public readonly email: string;
+  public readonly password: string;
   public readonly telefono?: string;
 
   constructor(props: UsuarioProps) {
-    const { nombre, apellido, email, telefono } = props;
+    const { nombre, apellido, email, password, telefono } = props;
     super(props);
     this.props = props;
 
     this.nombre = nombre;
     this.apellido = apellido;
     this.email = email;
+    this.password = password;
     this.telefono = telefono;
 
     this.validarDominio();
@@ -35,10 +37,17 @@ export class Usuario extends BaseEntity {
       throw new Error('El email es requerido');
     }
 
-    // Validación básica de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(this.email)) {
       throw new Error('El formato del email no es válido');
+    }
+
+    if (!this.password || this.password.trim().length === 0) {
+      throw new Error('La contraseña es requerida');
+    }
+
+    if (this.password.length < 8) {
+      throw new Error('La contraseña debe tener al menos 8 caracteres');
     }
   }
 
