@@ -7,6 +7,7 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
 import { LocalStrategy } from './infrastructure/strategies/local.strategy';
 import { RolesGuard } from './infrastructure/guards/roles.guard';
 import { ValidarUsuarioJwtUseCase } from './application/use-cases/validar-usuario-jwt.use-case';
+import { GoogleAuthUseCase } from './application/use-cases/google-auth.use-case';
 import { UsuariosModule } from '../usuarios/usuarios.module';
 import { SharedModule } from '../shared/shared.module';
 
@@ -21,7 +22,7 @@ import { SharedModule } from '../shared/shared.module';
     SharedModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, LocalStrategy, RolesGuard, ValidarUsuarioJwtUseCase],
+  providers: [AuthService, JwtStrategy, LocalStrategy, RolesGuard, ValidarUsuarioJwtUseCase, GoogleAuthUseCase],
   exports: [AuthService, RolesGuard],
 })
 export class AuthModule {} 
