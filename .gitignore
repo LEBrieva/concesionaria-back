@@ -1,3 +1,15 @@
+# Yarn Integrity file
+.yarn-integrity
+
+# Yarn v2+ (Berry) files
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
 # compiled output
 /dist
 /node_modules

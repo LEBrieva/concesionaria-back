@@ -11,5 +11,8 @@
   "testRegex": ".e2e-spec.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
-  }
+  },
+  "maxWorkers": 1,
+  "testTimeout": 30000,
+  "setupFilesAfterEnv": ["<rootDir>/test/setup-test-environment.ts"]
 }
