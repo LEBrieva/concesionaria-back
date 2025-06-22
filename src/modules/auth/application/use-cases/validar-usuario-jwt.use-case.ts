@@ -1,14 +1,14 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { UsuarioRepository } from '../../../usuarios/domain/usuario.repository';
+import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
+import { IUsuarioRepository } from '../../../usuarios/domain/usuario.repository';
 import { AuthenticatedUser } from '../../domain/interfaces/authenticated-user.interface';
 
 @Injectable()
 export class ValidarUsuarioJwtUseCase {
   constructor(
-    private readonly usuarioRepository: UsuarioRepository,
+    @Inject('IUsuarioRepository') private readonly usuarioRepository: IUsuarioRepository,
   ) {}
 
-  async ejecutar(userId: string): Promise<AuthenticatedUser> {
+  async execute(userId: string): Promise<AuthenticatedUser> {
     // Validación básica del ID
     if (!userId) {
       throw new UnauthorizedException('ID de usuario inválido');
