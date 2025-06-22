@@ -25,7 +25,7 @@ export class UsuarioController {
   // Endpoint público para registro de clientes (sin autenticación)
   @Post()
   async crear(@Body() dto: CrearUsuarioDto): Promise<CrearUsuarioResponseDto> {
-    const usuario = await this.crearUsuarioUseCase.ejecutar(dto);
+    const usuario = await this.crearUsuarioUseCase.execute(dto);
     return UsuarioToHttpMapper.toCrearUsuarioResponse(usuario);
   }
 
@@ -37,7 +37,7 @@ export class UsuarioController {
     @Body() dto: CrearUsuarioDto,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<CrearUsuarioResponseDto> {
-    const usuario = await this.crearUsuarioUseCase.ejecutar(dto, user);
+    const usuario = await this.crearUsuarioUseCase.execute(dto, user);
     return UsuarioToHttpMapper.toCrearUsuarioResponse(usuario);
   }
 
@@ -49,7 +49,7 @@ export class UsuarioController {
     @Body() dto: ActualizarPasswordDto,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<{ message: string }> {
-    await this.actualizarPasswordUseCase.ejecutar(id, dto, user.id);
+    await this.actualizarPasswordUseCase.execute(id, dto, user.id);
     return { message: 'Contraseña actualizada exitosamente' };
   }
 
@@ -61,7 +61,7 @@ export class UsuarioController {
     @Body() dto: ActualizarUsuarioDto,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<CrearUsuarioResponseDto> {
-    const usuario = await this.actualizarUsuarioUseCase.ejecutar(id, dto, user.id);
+    const usuario = await this.actualizarUsuarioUseCase.execute(id, dto, user.id);
     return UsuarioToHttpMapper.toCrearUsuarioResponse(usuario);
   }
 } 

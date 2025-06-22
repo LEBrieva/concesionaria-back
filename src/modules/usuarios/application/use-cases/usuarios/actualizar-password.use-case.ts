@@ -1,17 +1,17 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
 import { Usuario } from 'src/modules/usuarios/domain/usuario.entity';
-import { UsuarioRepository } from 'src/modules/usuarios/domain/usuario.repository';
+import { IUsuarioRepository } from 'src/modules/usuarios/domain/usuario.repository';
 import { ActualizarPasswordDto } from '../../dtos/usuarios/actualizar/actualizar-password.dto';
 import { PasswordService } from 'src/modules/shared/services/password.service';
 
 @Injectable()
 export class ActualizarPasswordUseCase {
   constructor(
-    private readonly usuarioRepository: UsuarioRepository,
+    @Inject('IUsuarioRepository') private readonly usuarioRepository: IUsuarioRepository,
     private readonly passwordService: PasswordService,
   ) {}
 
-  async ejecutar(usuarioId: string, dto: ActualizarPasswordDto, updatedBy: string): Promise<Usuario> {
+  async execute(usuarioId: string, dto: ActualizarPasswordDto, updatedBy: string): Promise<Usuario> {
     // Obtener el usuario
     const usuario = await this.usuarioRepository.obtenerPorId(usuarioId);
     if (!usuario) {

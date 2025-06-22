@@ -1,6 +1,6 @@
-import { Injectable, ConflictException, ForbiddenException } from '@nestjs/common';
+import { Injectable, ConflictException, ForbiddenException, Inject } from '@nestjs/common';
 import { Usuario } from 'src/modules/usuarios/domain/usuario.entity';
-import { UsuarioRepository } from 'src/modules/usuarios/domain/usuario.repository';
+import { IUsuarioRepository } from 'src/modules/usuarios/domain/usuario.repository';
 import { CrearUsuarioDto } from '../../dtos/usuarios/crear/crear-usuario.dto';
 import { PasswordService } from 'src/modules/shared/services/password.service';
 import { RolUsuario } from 'src/modules/usuarios/domain/usuario.enum';
@@ -10,11 +10,11 @@ import { randomUUID } from 'crypto';
 @Injectable()
 export class CrearUsuarioUseCase {
   constructor(
-    private readonly usuarioRepository: UsuarioRepository,
+    @Inject('IUsuarioRepository') private readonly usuarioRepository: IUsuarioRepository,
     private readonly passwordService: PasswordService,
   ) {}
 
-  async ejecutar(dto: CrearUsuarioDto, usuarioAutenticado?: AuthenticatedUser): Promise<Usuario> {
+  async execute(dto: CrearUsuarioDto, usuarioAutenticado?: AuthenticatedUser): Promise<Usuario> {
     // Verificar si ya existe un usuario con el mismo email
     const usuarioExistente = await this.usuarioRepository.obtenerPorEmail(dto.email);
     if (usuarioExistente) {
