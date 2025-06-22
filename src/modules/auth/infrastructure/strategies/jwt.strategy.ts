@@ -24,6 +24,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     // Delegar la validación al caso de uso
-    return await this.validarUsuarioJwtUseCase.ejecutar(payload.sub);
+    return await this.validarUsuarioJwtUseCase.execute(payload.sub);
   }
 } 
