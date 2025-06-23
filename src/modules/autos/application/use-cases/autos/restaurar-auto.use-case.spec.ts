@@ -38,6 +38,9 @@ describe('RestaurarAutoUseCase', () => {
     seguridad: [],
     interior: [],
     entretenimiento: [],
+    esFavorito: false,
+    createdAt: new Date(),
+    updatedAt: new Date(),
     createdBy: 'user-456',
     updatedBy: 'user-456',
     active: false, // Auto eliminado
@@ -67,6 +70,9 @@ describe('RestaurarAutoUseCase', () => {
     seguridad: [],
     interior: [],
     entretenimiento: [],
+    esFavorito: false,
+    createdAt: new Date(),
+    updatedAt: new Date(),
     createdBy: 'user-789',
     updatedBy: 'user-789',
     active: true, // Auto activo
@@ -87,6 +93,8 @@ describe('RestaurarAutoUseCase', () => {
       findAll: jest.fn(),
       findAllActive: jest.fn(),
       findByMatricula: jest.fn(),
+      findFavoritos: jest.fn(),
+      countFavoritos: jest.fn(),
     };
 
     mockHistorialRepository = {
