@@ -4,10 +4,15 @@ import { IAutoRepository } from '../../../domain/auto.repository';
 import { CrearAutoDTO } from '../../dtos/autos/crear/crear-auto.dto';
 import { Marca, EstadoAuto, Transmision, Color } from '../../../domain/auto.enum';
 import { Auto } from '../../../domain/auto.entity';
+import { HistorialService } from '../../../../shared/services/historial.service';
+import { IHistorialRepository } from '../../../../shared/interfaces/historial-repository.interface';
+import { TipoEntidad } from '../../../../shared/entities/historial.entity';
 
 describe('CrearAutoUseCase', () => {
   let useCase: CrearAutoUseCase;
   let mockAutoRepository: jest.Mocked<IAutoRepository>;
+  let mockHistorialRepository: jest.Mocked<IHistorialRepository>;
+  let historialService: HistorialService;
 
   const validCrearAutoDTO: CrearAutoDTO = {
     nombre: 'Toyota Corolla',
@@ -47,17 +52,36 @@ describe('CrearAutoUseCase', () => {
       restore: jest.fn(),
     };
 
+    // Crear mock del historial repository
+    mockHistorialRepository = {
+      crear: jest.fn(),
+      obtenerHistorialCompleto: jest.fn(),
+      obtenerPorEntidadYTipoAccion: jest.fn(),
+      obtenerPorEntidad: jest.fn(),
+      findAll: jest.fn(),
+      findAllActive: jest.fn(),
+      findOneById: jest.fn(),
+      softDelete: jest.fn(),
+      restore: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CrearAutoUseCase,
+        HistorialService,
         {
           provide: 'IAutoRepository',
           useValue: mockAutoRepository,
+        },
+        {
+          provide: 'IHistorialRepository',
+          useValue: mockHistorialRepository,
         },
       ],
     }).compile();
 
     useCase = module.get<CrearAutoUseCase>(CrearAutoUseCase);
+    historialService = module.get<HistorialService>(HistorialService);
   });
 
   afterEach(() => {
@@ -65,10 +89,13 @@ describe('CrearAutoUseCase', () => {
   });
 
   describe('execute', () => {
-    it('debería crear un auto exitosamente con datos válidos', async () => {
+    it('debería crear un auto exitosamente con datos válidos y registrar en historial', async () => {
       // Arrange
       const userId = 'user-123';
+      const mockHistorial = { id: 'historial-456', createdAt: new Date() };
+      
       mockAutoRepository.save.mockResolvedValue(undefined);
+      mockHistorialRepository.crear.mockResolvedValue(mockHistorial as any);
 
       // Act
       const result = await useCase.execute(validCrearAutoDTO, userId);
@@ -83,9 +110,32 @@ describe('CrearAutoUseCase', () => {
       expect(result.id).toBeDefined();
       expect(typeof result.id).toBe('string');
       
-      // Verificar que se llamó al repository
+      // Verificar que se llamó al repository del auto
       expect(mockAutoRepository.save).toHaveBeenCalledTimes(1);
       expect(mockAutoRepository.save).toHaveBeenCalledWith(expect.any(Auto));
+
+      // Verificar que se registró en el historial
+      expect(mockHistorialRepository.crear).toHaveBeenCalledTimes(1);
+      expect(mockHistorialRepository.crear).toHaveBeenCalledWith(
+        expect.objectContaining({
+          props: expect.objectContaining({
+            entidadId: result.id,
+            tipoEntidad: TipoEntidad.AUTO,
+            tipoAccion: 'CREAR',
+            createdBy: userId,
+            metadata: expect.objectContaining({
+              nombre: validCrearAutoDTO.nombre,
+              marca: validCrearAutoDTO.marca,
+              modelo: validCrearAutoDTO.modelo,
+              ano: validCrearAutoDTO.ano,
+              precio: validCrearAutoDTO.precio,
+              estado: validCrearAutoDTO.estado,
+              matricula: validCrearAutoDTO.matricula,
+              observaciones: `Auto creado: ${validCrearAutoDTO.nombre} - ${validCrearAutoDTO.matricula}`,
+            }),
+          }),
+        })
+      );
     });
 
     it('debería generar un UUID válido para el auto', async () => {
