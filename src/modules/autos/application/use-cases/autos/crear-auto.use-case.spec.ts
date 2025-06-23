@@ -1,0 +1,188 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { CrearAutoUseCase } from './crear-auto.use-case';
+import { IAutoRepository } from '../../../domain/auto.repository';
+import { CrearAutoDTO } from '../../dtos/autos/crear/crear-auto.dto';
+import { Marca, EstadoAuto, Transmision, Color } from '../../../domain/auto.enum';
+import { Auto } from '../../../domain/auto.entity';
+
+describe('CrearAutoUseCase', () => {
+  let useCase: CrearAutoUseCase;
+  let mockAutoRepository: jest.Mocked<IAutoRepository>;
+
+  const validCrearAutoDTO: CrearAutoDTO = {
+    nombre: 'Toyota Corolla',
+    descripcion: 'Sedán compacto',
+    observaciones: 'En excelente estado',
+    matricula: 'ABC-123',
+    marca: Marca.TOYOTA,
+    modelo: 'Corolla',
+    version: 'XLI',
+    ano: 2022,
+    kilometraje: 10000,
+    precio: 20000,
+    costo: 15000,
+    transmision: Transmision.MANUAL,
+    estado: EstadoAuto.DISPONIBLE,
+    color: Color.BLANCO,
+    imagenes: ['https://example.com/image1.jpg'],
+    equipamientoDestacado: ['GPS'],
+    caracteristicasGenerales: ['4 puertas'],
+    exterior: ['Espejos eléctricos'],
+    confort: ['Aire acondicionado'],
+    seguridad: ['ABS'],
+    interior: ['Tapizado'],
+    entretenimiento: ['Radio'],
+  };
+
+  beforeEach(async () => {
+    // Crear mock del repository
+    mockAutoRepository = {
+      save: jest.fn(),
+      findAll: jest.fn(),
+      findAllActive: jest.fn(),
+      findOneById: jest.fn(),
+      update: jest.fn(),
+      findByMatricula: jest.fn(),
+    };
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        CrearAutoUseCase,
+        {
+          provide: 'IAutoRepository',
+          useValue: mockAutoRepository,
+        },
+      ],
+    }).compile();
+
+    useCase = module.get<CrearAutoUseCase>(CrearAutoUseCase);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('execute', () => {
+    it('debería crear un auto exitosamente con datos válidos', async () => {
+      // Arrange
+      const userId = 'user-123';
+      mockAutoRepository.save.mockResolvedValue(undefined);
+
+      // Act
+      const result = await useCase.execute(validCrearAutoDTO, userId);
+
+      // Assert
+      expect(result).toBeInstanceOf(Auto);
+      expect(result.nombre).toBe(validCrearAutoDTO.nombre);
+      expect(result.marca).toBe(validCrearAutoDTO.marca);
+      expect(result.precio).toBe(validCrearAutoDTO.precio);
+      expect(result.createdBy).toBe(userId);
+      expect(result.updatedBy).toBe(userId);
+      expect(result.id).toBeDefined();
+      expect(typeof result.id).toBe('string');
+      
+      // Verificar que se llamó al repository
+      expect(mockAutoRepository.save).toHaveBeenCalledTimes(1);
+      expect(mockAutoRepository.save).toHaveBeenCalledWith(expect.any(Auto));
+    });
+
+    it('debería generar un UUID válido para el auto', async () => {
+      // Arrange
+      const userId = 'user-123';
+      mockAutoRepository.save.mockResolvedValue(undefined);
+
+      // Act
+      const result = await useCase.execute(validCrearAutoDTO, userId);
+
+      // Assert
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      expect(result.id).toMatch(uuidRegex);
+    });
+
+    it('debería asignar correctamente el userId como createdBy y updatedBy', async () => {
+      // Arrange
+      const userId = 'test-user-456';
+      mockAutoRepository.save.mockResolvedValue(undefined);
+
+      // Act
+      const result = await useCase.execute(validCrearAutoDTO, userId);
+
+      // Assert
+      expect(result.createdBy).toBe(userId);
+      expect(result.updatedBy).toBe(userId);
+    });
+
+    it('debería propagar errores de validación de la entidad Auto', async () => {
+      // Arrange
+      const userId = 'user-123';
+      const invalidDTO = { ...validCrearAutoDTO, precio: -1000 }; // Precio negativo
+      mockAutoRepository.save.mockResolvedValue(undefined);
+
+      // Act & Assert
+      await expect(useCase.execute(invalidDTO, userId)).rejects.toThrow(
+        'El precio y costo no pueden ser negativos'
+      );
+      
+      // No debería llamar al repository si la validación falla
+      expect(mockAutoRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('debería propagar errores del repository', async () => {
+      // Arrange
+      const userId = 'user-123';
+      const repositoryError = new Error('Error de base de datos');
+      mockAutoRepository.save.mockRejectedValue(repositoryError);
+
+      // Act & Assert
+      await expect(useCase.execute(validCrearAutoDTO, userId)).rejects.toThrow(
+        'Error de base de datos'
+      );
+      
+      expect(mockAutoRepository.save).toHaveBeenCalledTimes(1);
+    });
+
+    it('debería crear autos con diferentes datos manteniendo la estructura', async () => {
+      // Arrange
+      const userId = 'user-123';
+      const otroAutoDTO = {
+        ...validCrearAutoDTO,
+        nombre: 'Honda Civic',
+        marca: Marca.HONDA,
+        precio: 18000,
+        ano: 2021,
+      };
+      mockAutoRepository.save.mockResolvedValue(undefined);
+
+      // Act
+      const result = await useCase.execute(otroAutoDTO, userId);
+
+      // Assert
+      expect(result.nombre).toBe('Honda Civic');
+      expect(result.marca).toBe(Marca.HONDA);
+      expect(result.precio).toBe(18000);
+      expect(result.ano).toBe(2021);
+      expect(result.createdBy).toBe(userId);
+      expect(mockAutoRepository.save).toHaveBeenCalledWith(expect.any(Auto));
+    });
+
+    it('debería preservar todos los arrays del DTO en la entidad', async () => {
+      // Arrange
+      const userId = 'user-123';
+      const dtoConArrays = {
+        ...validCrearAutoDTO,
+        equipamientoDestacado: ['GPS', 'Bluetooth', 'Cámara'],
+        seguridad: ['ABS', 'Airbags', 'Control de estabilidad'],
+        entretenimiento: ['Radio AM/FM', 'USB', 'Pantalla táctil'],
+      };
+      mockAutoRepository.save.mockResolvedValue(undefined);
+
+      // Act
+      const result = await useCase.execute(dtoConArrays, userId);
+
+      // Assert
+      expect(result.equipamientoDestacado).toEqual(dtoConArrays.equipamientoDestacado);
+      expect(result.seguridad).toEqual(dtoConArrays.seguridad);
+      expect(result.entretenimiento).toEqual(dtoConArrays.entretenimiento);
+    });
+  });
+}); 

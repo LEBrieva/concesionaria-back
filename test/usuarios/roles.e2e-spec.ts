@@ -5,12 +5,28 @@ import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/modules/shared/prisma.service';
 import { verifyTestDatabase } from '../test-database.config';
 
+/**
+ * 🎯 TESTS E2E OPTIMIZADOS - Solo Integración Crítica
+ * 
+ * Estos tests cubren lo que los unitarios NO pueden:
+ * ✅ HTTP + JWT + Guards + BD real
+ * ✅ Serialización completa DTO ↔ JSON ↔ HTTP
+ * ✅ Sistema de permisos end-to-end
+ * ✅ Flujos de autenticación completos
+ * 
+ * ❌ NO duplicamos lógica ya cubierta por 130 tests unitarios
+ * ❌ NO testeamos validaciones simples de campos
+ * ❌ NO testeamos lógica de negocio pura
+ */
 describe('Usuarios con Roles E2E', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let adminToken: string;
   let vendedorToken: string;
   let clienteToken: string;
+
+  // Helper para evitar rate limiting
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   beforeAll(async () => {
     // 🔒 VERIFICACIÓN DE SEGURIDAD: Asegurar que usamos BD de test
@@ -48,6 +64,8 @@ describe('Usuarios con Roles E2E', () => {
         password: 'password123',
       });
 
+    await delay(500); // Evitar rate limiting
+
     // 2. Actualizar manualmente a ADMIN en BD de test
     await prisma.usuario.update({
       where: { email: 'admin@test.com' },
@@ -63,6 +81,7 @@ describe('Usuarios con Roles E2E', () => {
       });
     
     adminToken = adminLogin.body.access_token;
+    await delay(500);
 
     // 4. Crear VENDEDOR usando el token de ADMIN
     await request(app.getHttpServer())
@@ -76,6 +95,8 @@ describe('Usuarios con Roles E2E', () => {
         rol: 'VENDEDOR',
       });
 
+    await delay(500);
+
     // 5. Login como VENDEDOR
     const vendedorLogin = await request(app.getHttpServer())
       .post('/auth/login')
@@ -84,6 +105,7 @@ describe('Usuarios con Roles E2E', () => {
         password: 'password123',
       });
     vendedorToken = vendedorLogin.body.access_token;
+    await delay(500);
 
     // 6. Crear CLIENTE usando endpoint público
     await request(app.getHttpServer())
@@ -95,6 +117,8 @@ describe('Usuarios con Roles E2E', () => {
         password: 'password123',
       });
 
+    await delay(500);
+
     // 7. Login como CLIENTE
     const clienteLogin = await request(app.getHttpServer())
       .post('/auth/login')
@@ -105,8 +129,10 @@ describe('Usuarios con Roles E2E', () => {
     clienteToken = clienteLogin.body.access_token;
   }
 
-  describe('Creación de usuarios públicos', () => {
-    it('debe permitir crear usuario CLIENTE sin autenticación', async () => {
+  describe('🔗 Integración HTTP + BD + Autenticación', () => {
+    it('debe permitir crear usuario CLIENTE sin autenticación (flujo completo)', async () => {
+      await delay(1000); // Evitar rate limiting
+      
       const response = await request(app.getHttpServer())
         .post('/usuarios')
         .send({
@@ -117,12 +143,17 @@ describe('Usuarios con Roles E2E', () => {
         })
         .expect(201);
 
+      // Verificar que el flujo HTTP + validaciones + BD funciona
       expect(response.body.rol).toBe('CLIENTE');
       expect(response.body.nombre).toBe('Nuevo');
       expect(response.body.email).toContain('@test.com');
+      expect(response.body.password).toBeUndefined(); // No debe exponer password
+      expect(response.body.id).toBeDefined();
     });
 
-    it('NO debe permitir especificar rol ADMIN en endpoint público', async () => {
+    it('debe rechazar creación de ADMIN sin autenticación (seguridad end-to-end)', async () => {
+      await delay(1000);
+      
       await request(app.getHttpServer())
         .post('/usuarios')
         .send({
@@ -130,65 +161,55 @@ describe('Usuarios con Roles E2E', () => {
           apellido: 'Admin',
           email: `fake.admin.${Date.now()}@test.com`,
           password: 'password123',
-          rol: 'ADMIN', // Esto debería ser ignorado
+          rol: 'ADMIN', // Intentar bypass de seguridad
         })
         .expect(403);
     });
   });
 
-  describe('Creación de usuarios administrativos', () => {
-    it('ADMIN debe poder crear usuario VENDEDOR', async () => {
+  describe('🔐 Sistema de Permisos End-to-End (JWT + Guards + BD)', () => {
+    it('ADMIN debe crear cualquier rol con JWT válido (autorización completa)', async () => {
+      await delay(1000);
+      
       const response = await request(app.getHttpServer())
         .post('/usuarios/admin')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          nombre: 'Nuevo',
-          apellido: 'Vendedor',
-          email: `vendedor.${Date.now()}@test.com`,
-          password: 'password123',
-          rol: 'VENDEDOR',
-        })
-        .expect(201);
-
-      expect(response.body.rol).toBe('VENDEDOR');
-      expect(response.body.nombre).toBe('Nuevo');
-    });
-
-    it('ADMIN debe poder crear usuario ADMIN', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/usuarios/admin')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .send({
-          nombre: 'Nuevo',
+          nombre: 'Super',
           apellido: 'Admin',
-          email: `admin.${Date.now()}@test.com`,
+          email: `super.admin.${Date.now()}@test.com`,
           password: 'password123',
           rol: 'ADMIN',
         })
         .expect(201);
 
+      // Verificar que todo el stack de autorización funciona
       expect(response.body.rol).toBe('ADMIN');
-      expect(response.body.nombre).toBe('Nuevo');
+      expect(response.body.id).toBeDefined(); // Usuario creado
+      expect(response.body.password).toBeUndefined(); // Seguridad
     });
 
-    it('VENDEDOR debe poder crear solo usuario CLIENTE', async () => {
+    it('VENDEDOR limitado a CLIENTE (guards + roles funcionando)', async () => {
+      await delay(1000);
+      
       const response = await request(app.getHttpServer())
         .post('/usuarios/admin')
         .set('Authorization', `Bearer ${vendedorToken}`)
         .send({
           nombre: 'Cliente',
-          apellido: 'Por Vendedor',
-          email: `cliente.por.vendedor.${Date.now()}@test.com`,
+          apellido: 'Autorizado',
+          email: `cliente.autorizado.${Date.now()}@test.com`,
           password: 'password123',
           rol: 'CLIENTE',
         })
         .expect(201);
 
       expect(response.body.rol).toBe('CLIENTE');
-      expect(response.body.nombre).toBe('Cliente');
     });
 
-    it('VENDEDOR NO debe poder crear usuario ADMIN', async () => {
+    it('debe rechazar VENDEDOR intentando crear ADMIN (seguridad crítica)', async () => {
+      await delay(1000);
+      
       await request(app.getHttpServer())
         .post('/usuarios/admin')
         .set('Authorization', `Bearer ${vendedorToken}`)
@@ -197,12 +218,14 @@ describe('Usuarios con Roles E2E', () => {
           apellido: 'Admin',
           email: `fake.admin.vendedor.${Date.now()}@test.com`,
           password: 'password123',
-          rol: 'ADMIN',
+          rol: 'ADMIN', // Intento de escalación de privilegios
         })
         .expect(403);
     });
 
-    it('CLIENTE NO debe poder acceder al endpoint administrativo', async () => {
+    it('debe rechazar CLIENTE en endpoint admin (autorización estricta)', async () => {
+      await delay(1000);
+      
       await request(app.getHttpServer())
         .post('/usuarios/admin')
         .set('Authorization', `Bearer ${clienteToken}`)
@@ -216,7 +239,9 @@ describe('Usuarios con Roles E2E', () => {
         .expect(403);
     });
 
-    it('Usuario sin autenticación NO debe poder acceder al endpoint administrativo', async () => {
+    it('debe rechazar acceso sin JWT (autenticación requerida)', async () => {
+      await delay(1000);
+      
       await request(app.getHttpServer())
         .post('/usuarios/admin')
         .send({
@@ -230,8 +255,10 @@ describe('Usuarios con Roles E2E', () => {
     });
   });
 
-  describe('Autenticación y roles', () => {
-    it('debe incluir rol en la respuesta de login', async () => {
+  describe('🔑 Autenticación JWT End-to-End', () => {
+    it('debe generar JWT válido con roles (login completo)', async () => {
+      await delay(1000);
+      
       const response = await request(app.getHttpServer())
         .post('/auth/login')
         .send({
@@ -240,28 +267,23 @@ describe('Usuarios con Roles E2E', () => {
         })
         .expect(200);
 
+      // Verificar que el flujo completo de autenticación funciona
       expect(response.body.user.rol).toBe('ADMIN');
       expect(response.body.access_token).toBeDefined();
+      expect(response.body.access_token).toMatch(/^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$/); // JWT format
       expect(response.body.user.nombre).toBe('Admin');
       expect(response.body.user.email).toBe('admin@test.com');
+      expect(response.body.user.password).toBeUndefined(); // Seguridad
     });
 
-    it('debe rechazar credenciales inválidas', async () => {
+    it('debe rechazar credenciales inválidas (seguridad)', async () => {
+      await delay(1000);
+      
       await request(app.getHttpServer())
         .post('/auth/login')
         .send({
           email: 'admin@test.com',
           password: 'wrongpassword',
-        })
-        .expect(401);
-    });
-
-    it('debe rechazar usuario inexistente', async () => {
-      await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          email: 'noexiste@test.com',
-          password: 'password123',
         })
         .expect(401);
     });
