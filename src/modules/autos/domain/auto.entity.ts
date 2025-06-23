@@ -28,6 +28,7 @@ export class Auto extends BaseEntity {
   public readonly seguridad: string[];
   public readonly interior: string[];
   public readonly entretenimiento: string[];
+  public readonly esFavorito: boolean;
 
   constructor(props: AutoProps) {
     const {
@@ -53,6 +54,7 @@ export class Auto extends BaseEntity {
       seguridad,
       interior,
       entretenimiento,
+      esFavorito,
     } = props;
     super(props);
     this.props = props;
@@ -79,6 +81,7 @@ export class Auto extends BaseEntity {
     this.seguridad = seguridad;
     this.interior = interior;
     this.entretenimiento = entretenimiento;
+    this.esFavorito = esFavorito;
 
     this.validarDominio();
   }

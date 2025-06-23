@@ -34,10 +34,12 @@ describe('AutoQueryService', () => {
       seguridad: ['ABS'],
       interior: ['Tapizado'],
       entretenimiento: ['Radio'],
+      esFavorito: false,
       createdAt: new Date(),
       updatedAt: new Date(),
       createdBy: 'user-123',
       updatedBy: 'user-123',
+      active: true,
       ...overrides,
     };
     return new Auto(defaultProps);
@@ -53,6 +55,8 @@ describe('AutoQueryService', () => {
       findByMatricula: jest.fn(),
       softDelete: jest.fn(),
       restore: jest.fn(),
+      findFavoritos: jest.fn(),
+      countFavoritos: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

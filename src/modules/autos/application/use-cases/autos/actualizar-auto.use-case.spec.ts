@@ -40,6 +40,7 @@ describe('ActualizarAutoUseCase', () => {
     seguridad: ['ABS'],
     interior: ['Tapizado'],
     entretenimiento: ['Radio'],
+    esFavorito: false,
     createdAt: new Date(),
     updatedAt: new Date(),
     createdBy: 'user-original',
@@ -62,6 +63,8 @@ describe('ActualizarAutoUseCase', () => {
       findByMatricula: jest.fn(),
       softDelete: jest.fn(),
       restore: jest.fn(),
+      findFavoritos: jest.fn(),
+      countFavoritos: jest.fn(),
     };
 
     mockHistorialRepository = {
