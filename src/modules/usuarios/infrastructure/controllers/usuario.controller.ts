@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Put, Param, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Param, UseGuards } from '@nestjs/common';
 import { CrearUsuarioDto } from '../../application/dtos/usuarios/crear/crear-usuario.dto';
 import { CrearUsuarioResponseDto } from '../../application/dtos/usuarios/crear/crear-usuario-response.dto';
 import { ActualizarPasswordDto } from '../../application/dtos/usuarios/actualizar/actualizar-password.dto';
@@ -6,6 +6,7 @@ import { ActualizarUsuarioDto } from '../../application/dtos/usuarios/actualizar
 import { CrearUsuarioUseCase } from '../../application/use-cases/usuarios/crear-usuario.use-case';
 import { ActualizarPasswordUseCase } from '../../application/use-cases/usuarios/actualizar-password.use-case';
 import { ActualizarUsuarioUseCase } from '../../application/use-cases/usuarios/actualizar-usuario.use-case';
+import { UsuarioQueryService } from '../../application/services/usuario-query.service';
 import { UsuarioToHttpMapper } from '../../application/mappers/usuario-to-http.mapper';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/infrastructure/guards/roles.guard';
@@ -20,6 +21,7 @@ export class UsuarioController {
     private readonly crearUsuarioUseCase: CrearUsuarioUseCase,
     private readonly actualizarPasswordUseCase: ActualizarPasswordUseCase,
     private readonly actualizarUsuarioUseCase: ActualizarUsuarioUseCase,
+    private readonly usuarioQueryService: UsuarioQueryService,
   ) {}
 
   // Endpoint público para registro de clientes (sin autenticación)
@@ -62,6 +64,35 @@ export class UsuarioController {
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<CrearUsuarioResponseDto> {
     const usuario = await this.actualizarUsuarioUseCase.execute(id, dto, user.id);
+    return UsuarioToHttpMapper.toCrearUsuarioResponse(usuario);
+  }
+
+  // 🚀 NUEVOS ENDPOINTS QUE USAN MÉTODOS GENÉRICOS
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR)
+  @Get()
+  async findAll(): Promise<CrearUsuarioResponseDto[]> {
+    const usuarios = await this.usuarioQueryService.findAll();
+    return usuarios.map(UsuarioToHttpMapper.toCrearUsuarioResponse);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR)
+  @Get('activos')
+  async findAllActive(): Promise<CrearUsuarioResponseDto[]> {
+    const usuarios = await this.usuarioQueryService.findAllActive();
+    return usuarios.map(UsuarioToHttpMapper.toCrearUsuarioResponse);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR)
+  @Get(':id')
+  async findById(@Param('id') id: string): Promise<CrearUsuarioResponseDto> {
+    const usuario = await this.usuarioQueryService.findById(id);
+    if (!usuario) {
+      throw new Error('Usuario no encontrado');
+    }
     return UsuarioToHttpMapper.toCrearUsuarioResponse(usuario);
   }
 } 

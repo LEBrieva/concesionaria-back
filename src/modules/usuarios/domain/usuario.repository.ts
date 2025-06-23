@@ -1,10 +1,9 @@
 import { Usuario } from './usuario.entity';
+import { IBaseRepository } from '../../shared/interfaces/base-repository.interface';
 
-export interface IUsuarioRepository {
+export interface IUsuarioRepository extends IBaseRepository<Usuario> {
   crear(usuario: Usuario): Promise<Usuario>;
-  obtenerPorId(id: string): Promise<Usuario | null>;
   obtenerPorEmail(email: string): Promise<Usuario | null>;
-  obtenerTodos(): Promise<Usuario[]>;
   actualizar(id: string, usuario: Usuario): Promise<Usuario>;
   eliminar(id: string): Promise<void>;
 } 

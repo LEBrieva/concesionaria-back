@@ -5,6 +5,7 @@ import { AuthModule } from '../auth/auth.module';
 import { AutoController } from './infrastructure/controllers/auto.controller';
 import { CrearAutoUseCase } from './application/use-cases/autos/crear-auto.use-case';
 import { ActualizarAutoUseCase } from './application/use-cases/autos/actualizar-auto.use-case';
+import { AutoQueryService } from './application/services/auto-query.service';
 
 @Module({
   imports: [SharedModule, AuthModule],
@@ -12,10 +13,12 @@ import { ActualizarAutoUseCase } from './application/use-cases/autos/actualizar-
   providers: [
     CrearAutoUseCase,
     ActualizarAutoUseCase,
+    AutoQueryService,
     {
       provide: 'IAutoRepository',
       useClass: PrismaAutoRepository,
     },
   ],
+  exports: ['IAutoRepository'],
 })
 export class AutosModule {}

@@ -3,27 +3,24 @@ import { PrismaService } from 'src/modules/shared/prisma.service';
 import { Usuario } from '../../domain/usuario.entity';
 import { IUsuarioRepository } from '../../domain/usuario.repository';
 import { UsuarioToPrismaMapper } from '../mappers/usuario-to-prisma.mapper';
+import { BaseRepository } from 'src/modules/shared/repositories/base.repository';
+import { Usuario as PrismaUsuario } from '@prisma/client';
 
 @Injectable()
-export class PrismaUsuarioRepository implements IUsuarioRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class PrismaUsuarioRepository extends BaseRepository<Usuario, PrismaUsuario> implements IUsuarioRepository {
+  constructor(prisma: PrismaService) {
+    super(prisma, 'usuario');
+  }
+
+  // Implementación del método abstracto de BaseRepository
+  protected toDomain(prismaUsuario: PrismaUsuario): Usuario {
+    return UsuarioToPrismaMapper.toDomain(prismaUsuario);
+  }
 
   async crear(usuario: Usuario): Promise<Usuario> {
     const prismaUsuario = await this.prisma.usuario.create({
       data: UsuarioToPrismaMapper.toPrisma(usuario),
     });
-
-    return UsuarioToPrismaMapper.toDomain(prismaUsuario);
-  }
-
-  async obtenerPorId(id: string): Promise<Usuario | null> {
-    const prismaUsuario = await this.prisma.usuario.findUnique({
-      where: { id, active: true },
-    });
-
-    if (!prismaUsuario) {
-      return null;
-    }
 
     return UsuarioToPrismaMapper.toDomain(prismaUsuario);
   }
@@ -38,15 +35,6 @@ export class PrismaUsuarioRepository implements IUsuarioRepository {
     }
 
     return UsuarioToPrismaMapper.toDomain(prismaUsuario);
-  }
-
-  async obtenerTodos(): Promise<Usuario[]> {
-    const prismaUsuarios = await this.prisma.usuario.findMany({
-      where: { active: true },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    return prismaUsuarios.map(UsuarioToPrismaMapper.toDomain);
   }
 
   async actualizar(id: string, usuario: Usuario): Promise<Usuario> {

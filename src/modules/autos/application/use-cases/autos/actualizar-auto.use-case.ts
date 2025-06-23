@@ -10,7 +10,7 @@ export class ActualizarAutoUseCase {
   ) {}
 
   async execute(id: string, dto: ActualizarAutoDTO, userId: string): Promise<Auto> {
-    const auto = await this.autoRepo.findById(id);
+    const auto = await this.autoRepo.findOneById(id);
     if (!auto) throw new NotFoundException('Auto no encontrado');
 
     const updatedAuto = auto.actualizarCon({ ...dto, updatedBy: userId }); // si usás un método en la entidad
