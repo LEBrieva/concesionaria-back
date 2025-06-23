@@ -67,8 +67,12 @@ export class AutoController {
   @Patch(':id/restaurar')
   @UseGuards(RolesGuard)
   @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR)
-  async restore(@Param('id') id: string): Promise<{ message: string }> {
-    await this.restaurarAutoUseCase.execute(id);
+  async restore(
+    @Param('id') id: string,
+    @Body() body: { observaciones?: string } = {},
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<{ message: string }> {
+    await this.restaurarAutoUseCase.execute(id, user.id, body.observaciones);
     return { message: 'Auto restaurado correctamente' };
   }
 
