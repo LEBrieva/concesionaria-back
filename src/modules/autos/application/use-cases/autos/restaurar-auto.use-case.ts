@@ -1,9 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { IAutoRepository } from '@autos/domain/auto.repository';
 
 @Injectable()
 export class RestaurarAutoUseCase {
-  constructor(private readonly autoRepository: IAutoRepository) {}
+  constructor(
+    @Inject('IAutoRepository')
+    private readonly autoRepository: IAutoRepository
+  ) {}
 
   async execute(id: string): Promise<void> {
     // Verificar que el auto existe

@@ -7,6 +7,7 @@ import { ActualizarAutoDTO } from '@autos/application/dtos/autos/actualizar/actu
 import { ActualizarAutoUseCase } from '@autos/application/use-cases/autos/actualizar-auto.use-case';
 import { EliminarAutoUseCase } from '@autos/application/use-cases/autos/eliminar-auto.use-case';
 import { RestaurarAutoUseCase } from '@autos/application/use-cases/autos/restaurar-auto.use-case';
+import { CambiarEstadoAutoUseCase } from '../../application/use-cases/autos/cambiar-estado-auto.use-case';
 import { AutoQueryService } from '@autos/application/services/auto-query.service';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/infrastructure/guards/roles.guard';
@@ -14,6 +15,7 @@ import { Roles } from '../../../auth/infrastructure/decorators/roles.decorator';
 import { CurrentUser } from '../../../auth/infrastructure/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../../../auth/domain/interfaces/authenticated-user.interface';
 import { RolUsuario } from '../../../usuarios/domain/usuario.enum';
+import { CambiarEstadoAutoDto, CambiarEstadoAutoResponseDto } from '../../application/dtos/autos/cambio-estado/cambiar-estado-auto.dto';
 
 @Controller('autos')
 @UseGuards(JwtAuthGuard)
@@ -23,6 +25,7 @@ export class AutoController {
     private readonly actualizarAutoUseCase: ActualizarAutoUseCase,
     private readonly eliminarAutoUseCase: EliminarAutoUseCase,
     private readonly restaurarAutoUseCase: RestaurarAutoUseCase,
+    private readonly cambiarEstadoAutoUseCase: CambiarEstadoAutoUseCase,
     private readonly autoQueryService: AutoQueryService,
   ) {}
 
@@ -63,6 +66,17 @@ export class AutoController {
   async restore(@Param('id') id: string): Promise<{ message: string }> {
     await this.restaurarAutoUseCase.execute(id);
     return { message: 'Auto restaurado correctamente' };
+  }
+
+  @Patch(':id/cambiar-estado')
+  @UseGuards(RolesGuard)
+  @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR)
+  async cambiarEstado(
+    @Param('id') id: string,
+    @Body() body: CambiarEstadoAutoDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<CambiarEstadoAutoResponseDto> {
+    return await this.cambiarEstadoAutoUseCase.execute(id, body, user.id);
   }
 
   // 🚀 NUEVOS ENDPOINTS QUE USAN MÉTODOS GENÉRICOS

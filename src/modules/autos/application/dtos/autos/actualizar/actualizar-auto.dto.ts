@@ -7,8 +7,7 @@ import { IsOptionalNotEmpty } from '../../../../../shared/decorators/optional-no
 export class ActualizarAutoDTO extends PartialType(
   OmitType(CrearAutoDTO, [
     // Omitir campos que no deben actualizarse después de la creación
-    // Por ejemplo, si no quieres que se actualice la matrícula:
-    // 'matricula'
+    'estado', // El estado solo se cambia a través del endpoint específico
   ] as const)
 ) {
   // Override campos críticos que NO pueden estar vacíos si se envían

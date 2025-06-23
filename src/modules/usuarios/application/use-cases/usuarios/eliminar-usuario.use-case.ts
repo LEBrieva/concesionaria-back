@@ -1,9 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { IUsuarioRepository } from '../../../domain/usuario.repository';
 
 @Injectable()
 export class EliminarUsuarioUseCase {
-  constructor(private readonly usuarioRepository: IUsuarioRepository) {}
+  constructor(
+    @Inject('IUsuarioRepository')
+    private readonly usuarioRepository: IUsuarioRepository
+  ) {}
 
   async execute(id: string): Promise<void> {
     // Verificar que el usuario existe

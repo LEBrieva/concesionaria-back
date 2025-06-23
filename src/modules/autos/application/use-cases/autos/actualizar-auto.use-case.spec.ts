@@ -55,6 +55,8 @@ describe('ActualizarAutoUseCase', () => {
       findOneById: jest.fn(),
       update: jest.fn(),
       findByMatricula: jest.fn(),
+      softDelete: jest.fn(),
+      restore: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -197,7 +199,6 @@ describe('ActualizarAutoUseCase', () => {
         precio: 30000,
         kilometraje: 15000,
         observaciones: 'Completamente renovado',
-        estado: EstadoAuto.VENDIDO,
         equipamientoDestacado: ['GPS', 'Bluetooth', 'Cámara de reversa'],
       };
 
@@ -211,9 +212,10 @@ describe('ActualizarAutoUseCase', () => {
       expect(result.precio).toBe(multipleFieldsUpdate.precio);
       expect(result.kilometraje).toBe(multipleFieldsUpdate.kilometraje);
       expect(result.observaciones).toBe(multipleFieldsUpdate.observaciones);
-      expect(result.estado).toBe(multipleFieldsUpdate.estado);
       expect(result.equipamientoDestacado).toEqual(multipleFieldsUpdate.equipamientoDestacado);
       expect(result.updatedBy).toBe(userId);
+      // El estado debe mantenerse sin cambios ya que no se puede actualizar a través de este endpoint
+      expect(result.estado).toBe(existingAutoProps.estado);
     });
 
     it('debería mantener el ID original del auto', async () => {
