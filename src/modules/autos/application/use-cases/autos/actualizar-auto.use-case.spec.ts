@@ -6,10 +6,15 @@ import { ActualizarAutoDTO } from '../../dtos/autos/actualizar/actualizar-auto.d
 import { Auto } from '../../../domain/auto.entity';
 import { Marca, EstadoAuto, Transmision, Color } from '../../../domain/auto.enum';
 import { AutoProps } from '../../../domain/auto.interfaces';
+import { HistorialService } from '../../../../shared/services/historial.service';
+import { IHistorialRepository } from '../../../../shared/interfaces/historial-repository.interface';
+import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
 
 describe('ActualizarAutoUseCase', () => {
   let useCase: ActualizarAutoUseCase;
   let mockAutoRepository: jest.Mocked<IAutoRepository>;
+  let mockHistorialRepository: jest.Mocked<IHistorialRepository>;
+  let historialService: HistorialService;
 
   const existingAutoProps: AutoProps = {
     id: '123e4567-e89b-12d3-a456-426614174000',
@@ -59,17 +64,35 @@ describe('ActualizarAutoUseCase', () => {
       restore: jest.fn(),
     };
 
+    mockHistorialRepository = {
+      crear: jest.fn(),
+      obtenerHistorialCompleto: jest.fn(),
+      obtenerPorEntidadYTipoAccion: jest.fn(),
+      obtenerPorEntidad: jest.fn(),
+      findAll: jest.fn(),
+      findAllActive: jest.fn(),
+      findOneById: jest.fn(),
+      softDelete: jest.fn(),
+      restore: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ActualizarAutoUseCase,
+        HistorialService,
         {
           provide: 'IAutoRepository',
           useValue: mockAutoRepository,
+        },
+        {
+          provide: 'IHistorialRepository',
+          useValue: mockHistorialRepository,
         },
       ],
     }).compile();
 
     useCase = module.get<ActualizarAutoUseCase>(ActualizarAutoUseCase);
+    historialService = module.get<HistorialService>(HistorialService);
   });
 
   afterEach(() => {
@@ -77,14 +100,16 @@ describe('ActualizarAutoUseCase', () => {
   });
 
   describe('execute', () => {
-    it('debería actualizar un auto exitosamente', async () => {
+    it('debería actualizar un auto exitosamente y registrar cambios en historial', async () => {
       // Arrange
       const autoId = '123e4567-e89b-12d3-a456-426614174000';
       const userId = 'user-updater';
       const existingAuto = new Auto(existingAutoProps);
+      const mockHistorial = { id: 'historial-123', createdAt: new Date() };
 
       mockAutoRepository.findOneById.mockResolvedValue(existingAuto);
       mockAutoRepository.update.mockResolvedValue(undefined);
+      mockHistorialRepository.crear.mockResolvedValue(mockHistorial as any);
 
       // Act
       const result = await useCase.execute(autoId, validActualizarAutoDTO, userId);
@@ -105,6 +130,79 @@ describe('ActualizarAutoUseCase', () => {
       // Verificar llamadas al repository
       expect(mockAutoRepository.findOneById).toHaveBeenCalledWith(autoId);
       expect(mockAutoRepository.update).toHaveBeenCalledWith(autoId, expect.any(Auto));
+
+      // Verificar que se registraron los cambios en el historial (3 campos cambiaron)
+      expect(mockHistorialRepository.crear).toHaveBeenCalledTimes(3);
+      
+      // Verificar registro del cambio de precio
+      expect(mockHistorialRepository.crear).toHaveBeenCalledWith(
+        expect.objectContaining({
+          props: expect.objectContaining({
+            entidadId: autoId,
+            tipoEntidad: TipoEntidad.AUTO,
+            tipoAccion: TipoAccion.ACTUALIZAR,
+            campoAfectado: 'precio',
+            valorAnterior: '20000',
+            valorNuevo: '22000',
+            observaciones: "Campo 'precio' actualizado",
+            createdBy: userId,
+          }),
+        })
+      );
+
+      // Verificar registro del cambio de kilometraje
+      expect(mockHistorialRepository.crear).toHaveBeenCalledWith(
+        expect.objectContaining({
+          props: expect.objectContaining({
+            entidadId: autoId,
+            tipoEntidad: TipoEntidad.AUTO,
+            tipoAccion: TipoAccion.ACTUALIZAR,
+            campoAfectado: 'kilometraje',
+            valorAnterior: '10000',
+            valorNuevo: '12000',
+            observaciones: "Campo 'kilometraje' actualizado",
+            createdBy: userId,
+          }),
+        })
+      );
+
+      // Verificar registro del cambio de observaciones
+      expect(mockHistorialRepository.crear).toHaveBeenCalledWith(
+        expect.objectContaining({
+          props: expect.objectContaining({
+            entidadId: autoId,
+            tipoEntidad: TipoEntidad.AUTO,
+            tipoAccion: TipoAccion.ACTUALIZAR,
+            campoAfectado: 'observaciones',
+            valorAnterior: 'En buen estado',
+            valorNuevo: 'Actualizado - En excelente estado',
+            observaciones: "Campo 'observaciones' actualizado",
+            createdBy: userId,
+          }),
+        })
+      );
+    });
+
+    it('no debería registrar historial si no hay cambios', async () => {
+      // Arrange
+      const autoId = '123e4567-e89b-12d3-a456-426614174000';
+      const userId = 'user-updater';
+      const existingAuto = new Auto(existingAutoProps);
+      const sinCambios = { precio: 20000 }; // Mismo precio que ya tiene
+
+      mockAutoRepository.findOneById.mockResolvedValue(existingAuto);
+      mockAutoRepository.update.mockResolvedValue(undefined);
+
+      // Act
+      const result = await useCase.execute(autoId, sinCambios, userId);
+
+      // Assert
+      expect(result).toBeInstanceOf(Auto);
+      expect(mockAutoRepository.findOneById).toHaveBeenCalledWith(autoId);
+      expect(mockAutoRepository.update).toHaveBeenCalledWith(autoId, expect.any(Auto));
+      
+      // No debe registrar historial si no hay cambios
+      expect(mockHistorialRepository.crear).not.toHaveBeenCalled();
     });
 
     it('debería lanzar NotFoundException si el auto no existe', async () => {
