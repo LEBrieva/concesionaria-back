@@ -1,10 +1,12 @@
-import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
 import { CrearAutoDTO } from '@autos/application/dtos/autos/crear/crear-auto.dto';
 import { CrearAutoUseCase } from '@autos/application/use-cases/autos/crear-auto.use-case';
 import { AutoMapper } from '@autos/application/mappers/auto-to-http.mapper';
 import { AutoResponseDTO } from '@autos/application/dtos/autos/crear/crear-auto-response.dto';
 import { ActualizarAutoDTO } from '@autos/application/dtos/autos/actualizar/actualizar-auto.dto';
 import { ActualizarAutoUseCase } from '@autos/application/use-cases/autos/actualizar-auto.use-case';
+import { EliminarAutoUseCase } from '@autos/application/use-cases/autos/eliminar-auto.use-case';
+import { RestaurarAutoUseCase } from '@autos/application/use-cases/autos/restaurar-auto.use-case';
 import { AutoQueryService } from '@autos/application/services/auto-query.service';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/infrastructure/guards/roles.guard';
@@ -19,6 +21,8 @@ export class AutoController {
   constructor(
     private readonly crearAutoUseCase: CrearAutoUseCase,
     private readonly actualizarAutoUseCase: ActualizarAutoUseCase,
+    private readonly eliminarAutoUseCase: EliminarAutoUseCase,
+    private readonly restaurarAutoUseCase: RestaurarAutoUseCase,
     private readonly autoQueryService: AutoQueryService,
   ) {}
 
@@ -43,6 +47,22 @@ export class AutoController {
     return AutoMapper.toHttp(
       await this.actualizarAutoUseCase.execute(id, body, user.id),
     );
+  }
+
+  @Delete(':id')
+  @UseGuards(RolesGuard)
+  @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR)
+  async softDelete(@Param('id') id: string): Promise<{ message: string }> {
+    await this.eliminarAutoUseCase.execute(id);
+    return { message: 'Auto eliminado correctamente' };
+  }
+
+  @Patch(':id/restaurar')
+  @UseGuards(RolesGuard)
+  @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR)
+  async restore(@Param('id') id: string): Promise<{ message: string }> {
+    await this.restaurarAutoUseCase.execute(id);
+    return { message: 'Auto restaurado correctamente' };
   }
 
   // 🚀 NUEVOS ENDPOINTS QUE USAN MÉTODOS GENÉRICOS

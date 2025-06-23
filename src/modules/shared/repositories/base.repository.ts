@@ -40,6 +40,28 @@ export abstract class BaseRepository<T extends BaseEntity, TPrisma = any>
     return data ? this.toDomain(data) : null;
   }
 
+  async softDelete(id: string): Promise<void> {
+    const prismaTable = this.getPrismaTable();
+    await prismaTable.update({
+      where: { id },
+      data: { 
+        active: false,
+        updatedAt: new Date()
+      },
+    });
+  }
+
+  async restore(id: string): Promise<void> {
+    const prismaTable = this.getPrismaTable();
+    await prismaTable.update({
+      where: { id },
+      data: { 
+        active: true,
+        updatedAt: new Date()
+      },
+    });
+  }
+
   // Método helper para obtener la tabla de Prisma dinámicamente
   private getPrismaTable() {
     return (this.prisma as any)[this.tableName];

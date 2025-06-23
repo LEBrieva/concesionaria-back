@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, Param, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Patch, Post, Put, Param, UseGuards } from '@nestjs/common';
 import { CrearUsuarioDto } from '../../application/dtos/usuarios/crear/crear-usuario.dto';
 import { CrearUsuarioResponseDto } from '../../application/dtos/usuarios/crear/crear-usuario-response.dto';
 import { ActualizarPasswordDto } from '../../application/dtos/usuarios/actualizar/actualizar-password.dto';
@@ -6,6 +6,8 @@ import { ActualizarUsuarioDto } from '../../application/dtos/usuarios/actualizar
 import { CrearUsuarioUseCase } from '../../application/use-cases/usuarios/crear-usuario.use-case';
 import { ActualizarPasswordUseCase } from '../../application/use-cases/usuarios/actualizar-password.use-case';
 import { ActualizarUsuarioUseCase } from '../../application/use-cases/usuarios/actualizar-usuario.use-case';
+import { EliminarUsuarioUseCase } from '../../application/use-cases/usuarios/eliminar-usuario.use-case';
+import { RestaurarUsuarioUseCase } from '../../application/use-cases/usuarios/restaurar-usuario.use-case';
 import { UsuarioQueryService } from '../../application/services/usuario-query.service';
 import { UsuarioToHttpMapper } from '../../application/mappers/usuario-to-http.mapper';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
@@ -21,6 +23,8 @@ export class UsuarioController {
     private readonly crearUsuarioUseCase: CrearUsuarioUseCase,
     private readonly actualizarPasswordUseCase: ActualizarPasswordUseCase,
     private readonly actualizarUsuarioUseCase: ActualizarUsuarioUseCase,
+    private readonly eliminarUsuarioUseCase: EliminarUsuarioUseCase,
+    private readonly restaurarUsuarioUseCase: RestaurarUsuarioUseCase,
     private readonly usuarioQueryService: UsuarioQueryService,
   ) {}
 
@@ -65,6 +69,22 @@ export class UsuarioController {
   ): Promise<CrearUsuarioResponseDto> {
     const usuario = await this.actualizarUsuarioUseCase.execute(id, dto, user.id);
     return UsuarioToHttpMapper.toCrearUsuarioResponse(usuario);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.ADMIN) // Solo ADMIN puede eliminar usuarios
+  @Delete(':id')
+  async softDelete(@Param('id') id: string): Promise<{ message: string }> {
+    await this.eliminarUsuarioUseCase.execute(id);
+    return { message: 'Usuario eliminado correctamente' };
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.ADMIN) // Solo ADMIN puede restaurar usuarios
+  @Patch(':id/restaurar')
+  async restore(@Param('id') id: string): Promise<{ message: string }> {
+    await this.restaurarUsuarioUseCase.execute(id);
+    return { message: 'Usuario restaurado correctamente' };
   }
 
   // 🚀 NUEVOS ENDPOINTS QUE USAN MÉTODOS GENÉRICOS

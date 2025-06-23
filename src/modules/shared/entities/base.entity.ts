@@ -21,4 +21,18 @@ export abstract class BaseEntity {
     this.updatedBy = props.updatedBy;
     this.active = props.active ?? true;
   }
+
+  /**
+   * Verifica si la entidad está activa (no eliminada lógicamente)
+   */
+  public isActive(): boolean {
+    return this.active;
+  }
+
+  /**
+   * Verifica si la entidad está eliminada lógicamente
+   */
+  public isDeleted(): boolean {
+    return !this.active;
+  }
 }
