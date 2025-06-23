@@ -7,11 +7,16 @@ import { ActualizarUsuarioDto } from '../../dtos/usuarios/actualizar/actualizar-
 import { Usuario } from '../../../domain/usuario.entity';
 import { RolUsuario } from '../../../domain/usuario.enum';
 import { UsuarioProps } from '../../../domain/usuario.interfaces';
+import { HistorialService } from '../../../../shared/services/historial.service';
+import { IHistorialRepository } from '../../../../shared/interfaces/historial-repository.interface';
+import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
 
 describe('ActualizarUsuarioUseCase', () => {
   let useCase: ActualizarUsuarioUseCase;
   let mockUsuarioRepository: any;
   let mockPasswordService: any;
+  let mockHistorialRepository: jest.Mocked<IHistorialRepository>;
+  let historialService: HistorialService;
 
   const existingUsuarioProps: UsuarioProps = {
     id: '123e4567-e89b-12d3-a456-426614174000',
@@ -30,6 +35,11 @@ describe('ActualizarUsuarioUseCase', () => {
 
   const existingUsuario = new Usuario(existingUsuarioProps);
 
+  const mockHistorial = {
+    id: 'historial-123',
+    createdAt: new Date(),
+  };
+
   beforeEach(async () => {
     // Crear mocks
     mockUsuarioRepository = {
@@ -47,9 +57,22 @@ describe('ActualizarUsuarioUseCase', () => {
       verifyPassword: jest.fn(),
     };
 
+    mockHistorialRepository = {
+      crear: jest.fn(),
+      obtenerHistorialCompleto: jest.fn(),
+      obtenerPorEntidadYTipoAccion: jest.fn(),
+      obtenerPorEntidad: jest.fn(),
+      findAll: jest.fn(),
+      findAllActive: jest.fn(),
+      findOneById: jest.fn(),
+      softDelete: jest.fn(),
+      restore: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ActualizarUsuarioUseCase,
+        HistorialService,
         {
           provide: 'IUsuarioRepository',
           useValue: mockUsuarioRepository,
@@ -58,10 +81,15 @@ describe('ActualizarUsuarioUseCase', () => {
           provide: PasswordService,
           useValue: mockPasswordService,
         },
+        {
+          provide: 'IHistorialRepository',
+          useValue: mockHistorialRepository,
+        },
       ],
     }).compile();
 
     useCase = module.get<ActualizarUsuarioUseCase>(ActualizarUsuarioUseCase);
+    historialService = module.get<HistorialService>(HistorialService);
   });
 
   afterEach(() => {
@@ -73,7 +101,7 @@ describe('ActualizarUsuarioUseCase', () => {
     const usuarioId = existingUsuarioProps.id;
 
     describe('actualización exitosa', () => {
-      it('debería actualizar un usuario exitosamente sin contraseña', async () => {
+      it('debería actualizar un usuario exitosamente y registrar cambios en historial', async () => {
         // Arrange
         const updateDto: ActualizarUsuarioDto = {
           nombre: 'Carlos',
@@ -82,6 +110,7 @@ describe('ActualizarUsuarioUseCase', () => {
 
         mockUsuarioRepository.findOneById.mockResolvedValue(existingUsuario);
         mockUsuarioRepository.actualizar.mockImplementation(async (id, usuario) => usuario);
+        mockHistorialRepository.crear.mockResolvedValue(mockHistorial as any);
 
         // Act
         const result = await useCase.execute(usuarioId, updateDto, userId);
@@ -104,9 +133,44 @@ describe('ActualizarUsuarioUseCase', () => {
         expect(mockUsuarioRepository.findOneById).toHaveBeenCalledWith(usuarioId);
         expect(mockUsuarioRepository.actualizar).toHaveBeenCalledWith(usuarioId, expect.any(Usuario));
         expect(mockPasswordService.hashPassword).not.toHaveBeenCalled();
+
+        // Verificar que se registraron los cambios en el historial (2 campos cambiaron)
+        expect(mockHistorialRepository.crear).toHaveBeenCalledTimes(2);
+        
+        // Verificar registro del cambio de nombre
+        expect(mockHistorialRepository.crear).toHaveBeenCalledWith(
+          expect.objectContaining({
+            props: expect.objectContaining({
+              entidadId: usuarioId,
+              tipoEntidad: TipoEntidad.USUARIO,
+              tipoAccion: TipoAccion.ACTUALIZAR,
+              campoAfectado: 'nombre',
+              valorAnterior: 'Juan',
+              valorNuevo: 'Carlos',
+              observaciones: "Campo 'nombre' actualizado",
+              createdBy: userId,
+            }),
+          })
+        );
+
+        // Verificar registro del cambio de teléfono
+        expect(mockHistorialRepository.crear).toHaveBeenCalledWith(
+          expect.objectContaining({
+            props: expect.objectContaining({
+              entidadId: usuarioId,
+              tipoEntidad: TipoEntidad.USUARIO,
+              tipoAccion: TipoAccion.ACTUALIZAR,
+              campoAfectado: 'telefono',
+              valorAnterior: '+1234567890',
+              valorNuevo: '+9876543210',
+              observaciones: "Campo 'telefono' actualizado",
+              createdBy: userId,
+            }),
+          })
+        );
       });
 
-      it('debería actualizar un usuario con nueva contraseña', async () => {
+      it('debería actualizar un usuario con nueva contraseña y registrar en historial', async () => {
         // Arrange
         const newPassword = 'newPassword123';
         const hashedNewPassword = 'hashed_new_password';
@@ -118,6 +182,7 @@ describe('ActualizarUsuarioUseCase', () => {
         mockUsuarioRepository.findOneById.mockResolvedValue(existingUsuario);
         mockPasswordService.hashPassword.mockResolvedValue(hashedNewPassword);
         mockUsuarioRepository.actualizar.mockImplementation(async (id, usuario) => usuario);
+        mockHistorialRepository.crear.mockResolvedValue(mockHistorial as any);
 
         // Act
         const result = await useCase.execute(usuarioId, updateDto, userId);
@@ -131,6 +196,47 @@ describe('ActualizarUsuarioUseCase', () => {
         // Verificar llamadas
         expect(mockPasswordService.hashPassword).toHaveBeenCalledWith(newPassword);
         expect(mockUsuarioRepository.actualizar).toHaveBeenCalledWith(usuarioId, expect.any(Usuario));
+
+        // Verificar que se registraron los cambios en el historial (nombre + password)
+        expect(mockHistorialRepository.crear).toHaveBeenCalledTimes(2);
+
+        // Verificar registro del cambio de contraseña (valores protegidos)
+        expect(mockHistorialRepository.crear).toHaveBeenCalledWith(
+          expect.objectContaining({
+            props: expect.objectContaining({
+              entidadId: usuarioId,
+              tipoEntidad: TipoEntidad.USUARIO,
+              tipoAccion: TipoAccion.ACTUALIZAR,
+              campoAfectado: 'password',
+              valorAnterior: '[PROTEGIDO]',
+              valorNuevo: '[ACTUALIZADO]',
+              observaciones: "Campo 'password' actualizado",
+              createdBy: userId,
+            }),
+          })
+        );
+      });
+
+      it('no debería registrar historial si no hay cambios', async () => {
+        // Arrange
+        const updateDto: ActualizarUsuarioDto = {
+          nombre: 'Juan', // Mismo nombre que ya tiene
+          telefono: '+1234567890', // Mismo teléfono que ya tiene
+        };
+
+        mockUsuarioRepository.findOneById.mockResolvedValue(existingUsuario);
+        mockUsuarioRepository.actualizar.mockImplementation(async (id, usuario) => usuario);
+
+        // Act
+        const result = await useCase.execute(usuarioId, updateDto, userId);
+
+        // Assert
+        expect(result).toBeInstanceOf(Usuario);
+        expect(mockUsuarioRepository.findOneById).toHaveBeenCalledWith(usuarioId);
+        expect(mockUsuarioRepository.actualizar).toHaveBeenCalledWith(usuarioId, expect.any(Usuario));
+        
+        // No debe registrar historial si no hay cambios
+        expect(mockHistorialRepository.crear).not.toHaveBeenCalled();
       });
 
       it('debería actualizar múltiples campos correctamente', async () => {
