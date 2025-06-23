@@ -6,12 +6,15 @@ import { PasswordService } from 'src/modules/shared/services/password.service';
 import { RolUsuario } from 'src/modules/usuarios/domain/usuario.enum';
 import { AuthenticatedUser } from 'src/modules/auth/domain/interfaces/authenticated-user.interface';
 import { randomUUID } from 'crypto';
+import { HistorialService } from '../../../../shared/services/historial.service';
+import { TipoEntidad } from '../../../../shared/entities/historial.entity';
 
 @Injectable()
 export class CrearUsuarioUseCase {
   constructor(
     @Inject('IUsuarioRepository') private readonly usuarioRepository: IUsuarioRepository,
     private readonly passwordService: PasswordService,
+    private readonly historialService: HistorialService,
   ) {}
 
   async execute(dto: CrearUsuarioDto, usuarioAutenticado?: AuthenticatedUser): Promise<Usuario> {
@@ -42,7 +45,27 @@ export class CrearUsuarioUseCase {
       active: true,
     });
 
-    return await this.usuarioRepository.crear(usuario);
+    // Crear el usuario
+    const usuarioCreado = await this.usuarioRepository.crear(usuario);
+
+    // Registrar en historial
+    await this.historialService.registrarCreacion(
+      usuarioCreado.id,
+      TipoEntidad.USUARIO,
+      usuarioAutenticado?.id || 'system',
+      {
+        nombre: usuarioCreado.nombre,
+        apellido: usuarioCreado.apellido,
+        email: usuarioCreado.email,
+        telefono: usuarioCreado.telefono,
+        rol: usuarioCreado.rol,
+        creadoPor: usuarioAutenticado ? `${usuarioAutenticado.nombre} (${usuarioAutenticado.rol})` : 'Sistema',
+        tipoCreacion: usuarioAutenticado ? 'admin_creation' : 'self_registration',
+        observaciones: `Usuario creado: ${usuarioCreado.nombre} ${usuarioCreado.apellido} - ${usuarioCreado.email}`,
+      }
+    );
+
+    return usuarioCreado;
   }
 
   private validarPermisosCreacion(rolSolicitado?: RolUsuario, usuarioAutenticado?: AuthenticatedUser): void {
