@@ -13,7 +13,7 @@ export class ActualizarPasswordUseCase {
 
   async execute(usuarioId: string, dto: ActualizarPasswordDto, updatedBy: string): Promise<Usuario> {
     // Obtener el usuario
-    const usuario = await this.usuarioRepository.obtenerPorId(usuarioId);
+    const usuario = await this.usuarioRepository.findOneById(usuarioId);
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado');
     }
