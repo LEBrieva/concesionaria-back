@@ -74,16 +74,24 @@ export class UsuarioController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RolUsuario.ADMIN) // Solo ADMIN puede eliminar usuarios
   @Delete(':id')
-  async softDelete(@Param('id') id: string): Promise<{ message: string }> {
-    await this.eliminarUsuarioUseCase.execute(id);
+  async softDelete(
+    @Param('id') id: string,
+    @Body() body: { observaciones?: string },
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<{ message: string }> {
+    await this.eliminarUsuarioUseCase.execute(id, user.id, body.observaciones);
     return { message: 'Usuario eliminado correctamente' };
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RolUsuario.ADMIN) // Solo ADMIN puede restaurar usuarios
   @Patch(':id/restaurar')
-  async restore(@Param('id') id: string): Promise<{ message: string }> {
-    await this.restaurarUsuarioUseCase.execute(id);
+  async restore(
+    @Param('id') id: string,
+    @Body() body: { observaciones?: string },
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<{ message: string }> {
+    await this.restaurarUsuarioUseCase.execute(id, user.id, body.observaciones);
     return { message: 'Usuario restaurado correctamente' };
   }
 

@@ -51,6 +51,8 @@ describe('AutoQueryService', () => {
       findOneById: jest.fn(),
       update: jest.fn(),
       findByMatricula: jest.fn(),
+      softDelete: jest.fn(),
+      restore: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

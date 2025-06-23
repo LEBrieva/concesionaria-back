@@ -9,6 +9,7 @@ import {
   IsEnum,
   Max,
   Length,
+  IsIn,
 } from 'class-validator';
 
 export class CrearAutoDTO {
@@ -59,8 +60,10 @@ export class CrearAutoDTO {
   @IsEnum(Transmision)
   transmision: Transmision;
 
-  @IsEnum(EstadoAuto)
-  estado: EstadoAuto;
+  @IsIn([EstadoAuto.POR_INGRESAR, EstadoAuto.DISPONIBLE], {
+    message: 'El estado inicial debe ser POR_INGRESAR o DISPONIBLE',
+  })
+  estado: EstadoAuto.POR_INGRESAR | EstadoAuto.DISPONIBLE;
 
   @IsArray()
   @ArrayNotEmpty()

@@ -36,6 +36,19 @@ enum RolUsuario {
   CLIENTE
 }
 
+enum TipoAccion {
+  CREAR
+  ACTUALIZAR
+  ELIMINAR
+  RESTAURAR
+  CAMBIO_ESTADO
+}
+
+enum TipoEntidad {
+  AUTO
+  USUARIO
+}
+
 enum Marca {
   TOYOTA
   HONDA
@@ -129,6 +142,29 @@ model Usuario {
   createdBy String
   updatedBy String
   active    Boolean  @default(true)
+}
+
+model Historial {
+  id              String      @id @default(uuid())
+  entidadId       String      // ID de la entidad afectada (Auto, Usuario, etc.)
+  tipoEntidad     TipoEntidad // Tipo de entidad (AUTO, USUARIO)
+  tipoAccion      TipoAccion  // Tipo de acción realizada
+  campoAfectado   String?     // Campo específico que cambió (opcional)
+  valorAnterior   String?     // Valor anterior del campo (opcional)
+  valorNuevo      String?     // Nuevo valor del campo (opcional)
+  observaciones   String?     // Observaciones adicionales (opcional)
+  metadata        Json?       // Metadata adicional en formato JSON
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  createdBy       String      // ID del usuario que realizó la acción
+  updatedBy       String
+  active          Boolean     @default(true)
+
+  // Índices para optimizar consultas
+  @@index([entidadId, tipoEntidad])
+  @@index([tipoAccion])
+  @@index([createdAt])
+  @@map("historial")
 }
 
 

@@ -7,6 +7,7 @@ import { CrearAutoUseCase } from './application/use-cases/autos/crear-auto.use-c
 import { ActualizarAutoUseCase } from './application/use-cases/autos/actualizar-auto.use-case';
 import { EliminarAutoUseCase } from './application/use-cases/autos/eliminar-auto.use-case';
 import { RestaurarAutoUseCase } from './application/use-cases/autos/restaurar-auto.use-case';
+import { CambiarEstadoAutoUseCase } from './application/use-cases/autos/cambiar-estado-auto.use-case';
 import { AutoQueryService } from './application/services/auto-query.service';
 
 @Module({
@@ -17,6 +18,7 @@ import { AutoQueryService } from './application/services/auto-query.service';
     ActualizarAutoUseCase,
     EliminarAutoUseCase,
     RestaurarAutoUseCase,
+    CambiarEstadoAutoUseCase,
     AutoQueryService,
     {
       provide: 'IAutoRepository',

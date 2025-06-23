@@ -7,11 +7,16 @@ import { CrearUsuarioDto } from '../../dtos/usuarios/crear/crear-usuario.dto';
 import { RolUsuario } from '../../../domain/usuario.enum';
 import { Usuario } from '../../../domain/usuario.entity';
 import { AuthenticatedUser } from '../../../../auth/domain/interfaces/authenticated-user.interface';
+import { HistorialService } from '../../../../shared/services/historial.service';
+import { IHistorialRepository } from '../../../../shared/interfaces/historial-repository.interface';
+import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
 
 describe('CrearUsuarioUseCase', () => {
   let useCase: CrearUsuarioUseCase;
   let mockUsuarioRepository: any;
   let mockPasswordService: any;
+  let mockHistorialRepository: jest.Mocked<IHistorialRepository>;
+  let historialService: HistorialService;
 
   const validCrearUsuarioDto: CrearUsuarioDto = {
     nombre: 'Juan',
@@ -43,6 +48,11 @@ describe('CrearUsuarioUseCase', () => {
     rol: RolUsuario.CLIENTE,
   };
 
+  const mockHistorial = {
+    id: 'historial-456',
+    createdAt: new Date(),
+  };
+
   beforeEach(async () => {
     // Crear mocks
     mockUsuarioRepository = {
@@ -60,9 +70,22 @@ describe('CrearUsuarioUseCase', () => {
       verifyPassword: jest.fn(),
     };
 
+    mockHistorialRepository = {
+      crear: jest.fn(),
+      obtenerHistorialCompleto: jest.fn(),
+      obtenerPorEntidadYTipoAccion: jest.fn(),
+      obtenerPorEntidad: jest.fn(),
+      findAll: jest.fn(),
+      findAllActive: jest.fn(),
+      findOneById: jest.fn(),
+      softDelete: jest.fn(),
+      restore: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CrearUsuarioUseCase,
+        HistorialService,
         {
           provide: 'IUsuarioRepository',
           useValue: mockUsuarioRepository,
@@ -71,10 +94,15 @@ describe('CrearUsuarioUseCase', () => {
           provide: PasswordService,
           useValue: mockPasswordService,
         },
+        {
+          provide: 'IHistorialRepository',
+          useValue: mockHistorialRepository,
+        },
       ],
     }).compile();
 
     useCase = module.get<CrearUsuarioUseCase>(CrearUsuarioUseCase);
+    historialService = module.get<HistorialService>(HistorialService);
   });
 
   afterEach(() => {
@@ -83,12 +111,13 @@ describe('CrearUsuarioUseCase', () => {
 
   describe('execute', () => {
     describe('creación exitosa', () => {
-      it('debería crear un usuario exitosamente sin autenticación (cliente por defecto)', async () => {
+      it('debería crear un usuario exitosamente sin autenticación y registrar en historial', async () => {
         // Arrange
         const hashedPassword = 'hashed_password123';
         mockUsuarioRepository.obtenerPorEmail.mockResolvedValue(null);
         mockPasswordService.hashPassword.mockResolvedValue(hashedPassword);
         mockUsuarioRepository.crear.mockImplementation(async (usuario) => usuario);
+        mockHistorialRepository.crear.mockResolvedValue(mockHistorial as any);
 
         // Act
         const result = await useCase.execute(validCrearUsuarioDto);
@@ -107,15 +136,39 @@ describe('CrearUsuarioUseCase', () => {
         expect(mockUsuarioRepository.obtenerPorEmail).toHaveBeenCalledWith(validCrearUsuarioDto.email);
         expect(mockPasswordService.hashPassword).toHaveBeenCalledWith(validCrearUsuarioDto.password);
         expect(mockUsuarioRepository.crear).toHaveBeenCalledWith(expect.any(Usuario));
+
+        // Verificar que se registró en el historial
+        expect(mockHistorialRepository.crear).toHaveBeenCalledTimes(1);
+        expect(mockHistorialRepository.crear).toHaveBeenCalledWith(
+          expect.objectContaining({
+            props: expect.objectContaining({
+              entidadId: result.id,
+              tipoEntidad: TipoEntidad.USUARIO,
+              tipoAccion: TipoAccion.CREAR,
+              createdBy: 'system',
+              metadata: expect.objectContaining({
+                nombre: result.nombre,
+                apellido: result.apellido,
+                email: result.email,
+                telefono: result.telefono,
+                rol: result.rol,
+                creadoPor: 'Sistema',
+                tipoCreacion: 'self_registration',
+                observaciones: `Usuario creado: ${result.nombre} ${result.apellido} - ${result.email}`,
+              }),
+            }),
+          })
+        );
       });
 
-      it('debería crear un usuario con usuario admin autenticado', async () => {
+      it('debería crear un usuario con usuario admin autenticado y registrar en historial', async () => {
         // Arrange
         const dtoConRolAdmin = { ...validCrearUsuarioDto, rol: RolUsuario.ADMIN };
         const hashedPassword = 'hashed_password123';
         mockUsuarioRepository.obtenerPorEmail.mockResolvedValue(null);
         mockPasswordService.hashPassword.mockResolvedValue(hashedPassword);
         mockUsuarioRepository.crear.mockImplementation(async (usuario) => usuario);
+        mockHistorialRepository.crear.mockResolvedValue(mockHistorial as any);
 
         // Act
         const result = await useCase.execute(dtoConRolAdmin, mockAdminUser);
@@ -124,6 +177,26 @@ describe('CrearUsuarioUseCase', () => {
         expect(result.rol).toBe(RolUsuario.ADMIN);
         expect(result.createdBy).toBe(mockAdminUser.id);
         expect(result.updatedBy).toBe(mockAdminUser.id);
+
+        // Verificar que se registró en el historial con información del admin
+        expect(mockHistorialRepository.crear).toHaveBeenCalledWith(
+          expect.objectContaining({
+            props: expect.objectContaining({
+              entidadId: result.id,
+              tipoEntidad: TipoEntidad.USUARIO,
+              tipoAccion: TipoAccion.CREAR,
+              createdBy: mockAdminUser.id,
+              metadata: expect.objectContaining({
+                nombre: result.nombre,
+                apellido: result.apellido,
+                email: result.email,
+                rol: RolUsuario.ADMIN,
+                creadoPor: `${mockAdminUser.nombre} (${mockAdminUser.rol})`,
+                tipoCreacion: 'admin_creation',
+              }),
+            }),
+          })
+        );
       });
 
       it('debería hashear la contraseña correctamente', async () => {
