@@ -55,8 +55,12 @@ export class AutoController {
   @Delete(':id')
   @UseGuards(RolesGuard)
   @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR)
-  async softDelete(@Param('id') id: string): Promise<{ message: string }> {
-    await this.eliminarAutoUseCase.execute(id);
+  async softDelete(
+    @Param('id') id: string,
+    @Body() body: { observaciones?: string } = {},
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<{ message: string }> {
+    await this.eliminarAutoUseCase.execute(id, user.id, body.observaciones);
     return { message: 'Auto eliminado correctamente' };
   }
 
