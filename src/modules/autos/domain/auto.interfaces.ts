@@ -24,4 +24,5 @@ export interface AutoProps extends BaseProps {
   seguridad: string[];
   interior: string[];
   entretenimiento: string[];
+  esFavorito: boolean;
 }

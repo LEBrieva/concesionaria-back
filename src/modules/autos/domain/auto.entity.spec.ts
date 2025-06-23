@@ -27,6 +27,7 @@ describe('Auto Entity', () => {
     seguridad: ['ABS', 'Airbags'],
     interior: ['Tapizado de cuero'],
     entretenimiento: ['Radio AM/FM'],
+    esFavorito: false,
     createdAt: new Date(),
     updatedAt: new Date(),
     createdBy: 'user-123',
@@ -43,6 +44,7 @@ describe('Auto Entity', () => {
       expect(auto.precio).toBe(validAutoProps.precio);
       expect(auto.ano).toBe(validAutoProps.ano);
       expect(auto.kilometraje).toBe(validAutoProps.kilometraje);
+      expect(auto.esFavorito).toBe(validAutoProps.esFavorito);
     });
 
     it('debería asignar correctamente todas las propiedades de arrays', () => {

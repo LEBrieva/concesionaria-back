@@ -8,6 +8,8 @@ import { ActualizarAutoUseCase } from '@autos/application/use-cases/autos/actual
 import { EliminarAutoUseCase } from '@autos/application/use-cases/autos/eliminar-auto.use-case';
 import { RestaurarAutoUseCase } from '@autos/application/use-cases/autos/restaurar-auto.use-case';
 import { CambiarEstadoAutoUseCase } from '../../application/use-cases/autos/cambiar-estado-auto.use-case';
+import { GestionarFavoritoUseCase } from '../../application/use-cases/autos/gestionar-favorito.use-case';
+import { ObtenerFavoritosUseCase } from '../../application/use-cases/autos/obtener-favoritos.use-case';
 import { AutoQueryService } from '@autos/application/services/auto-query.service';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/infrastructure/guards/roles.guard';
@@ -16,6 +18,7 @@ import { CurrentUser } from '../../../auth/infrastructure/decorators/current-use
 import { AuthenticatedUser } from '../../../auth/domain/interfaces/authenticated-user.interface';
 import { RolUsuario } from '../../../usuarios/domain/usuario.enum';
 import { CambiarEstadoAutoDto, CambiarEstadoAutoResponseDto } from '../../application/dtos/autos/cambio-estado/cambiar-estado-auto.dto';
+import { GestionarFavoritoDto } from '../../application/dtos/autos/favoritos/gestionar-favorito.dto';
 
 @Controller('autos')
 @UseGuards(JwtAuthGuard)
@@ -26,6 +29,8 @@ export class AutoController {
     private readonly eliminarAutoUseCase: EliminarAutoUseCase,
     private readonly restaurarAutoUseCase: RestaurarAutoUseCase,
     private readonly cambiarEstadoAutoUseCase: CambiarEstadoAutoUseCase,
+    private readonly gestionarFavoritoUseCase: GestionarFavoritoUseCase,
+    private readonly obtenerFavoritosUseCase: ObtenerFavoritosUseCase,
     private readonly autoQueryService: AutoQueryService,
   ) {}
 
@@ -87,7 +92,62 @@ export class AutoController {
     return await this.cambiarEstadoAutoUseCase.execute(id, body, user.id);
   }
 
-  // 🚀 NUEVOS ENDPOINTS QUE USAN MÉTODOS GENÉRICOS
+  // 🌟 ENDPOINT DE FAVORITOS - SOLO ADMIN
+
+  /**
+   * Endpoint para gestionar favoritos desde el dashboard admin
+   * Solo administradores pueden marcar/desmarcar autos como favoritos
+   * Este endpoint será usado por la estrella en la interfaz del dashboard
+   */
+  @Patch(':id/favorito')
+  @UseGuards(RolesGuard)
+  @Roles(RolUsuario.ADMIN) // Solo ADMIN puede gestionar favoritos
+  async gestionarFavorito(
+    @Param('id') id: string,
+    @Body() body: GestionarFavoritoDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<{ 
+    message: string; 
+    esFavorito: boolean;
+    totalFavoritos: number;
+  }> {
+    await this.gestionarFavoritoUseCase.execute(id, body, user.id);
+    
+    // Obtener el total actual de favoritos para la respuesta
+    const totalFavoritos = await this.obtenerFavoritosUseCase.execute();
+    
+    return { 
+      message: body.esFavorito 
+        ? 'Auto marcado como favorito para el banner destacado' 
+        : 'Auto removido del banner destacado',
+      esFavorito: body.esFavorito,
+      totalFavoritos: totalFavoritos.length
+    };
+  }
+
+  /**
+   * Endpoint para obtener favoritos (solo para admin)
+   * Usado en el dashboard para mostrar qué autos están marcados como favoritos
+   */
+  @Get('favoritos')
+  @UseGuards(RolesGuard)
+  @Roles(RolUsuario.ADMIN)
+  async obtenerFavoritosAdmin(): Promise<{
+    message: string;
+    total: number;
+    maxFavoritos: number;
+    favoritos: AutoResponseDTO[];
+  }> {
+    const favoritos = await this.obtenerFavoritosUseCase.execute();
+    return {
+      message: 'Autos favoritos obtenidos exitosamente',
+      total: favoritos.length,
+      maxFavoritos: 6,
+      favoritos: favoritos.map(AutoMapper.toHttp)
+    };
+  }
+
+  // 🚀 ENDPOINTS GENERALES
 
   @Get()
   async findAll(): Promise<AutoResponseDTO[]> {

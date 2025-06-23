@@ -16,6 +16,7 @@ export class CrearAutoUseCase {
   async execute(dto: CrearAutoDTO, userId: string): Promise<Auto> {
     const auto = new Auto({
       ...dto,
+      esFavorito: false,
       id: uuidv4(),
       createdBy: userId,
       updatedBy: userId,

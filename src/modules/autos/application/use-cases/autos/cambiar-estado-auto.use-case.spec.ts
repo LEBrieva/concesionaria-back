@@ -7,6 +7,7 @@ import { IHistorialRepository } from '../../../../shared/interfaces/historial-re
 import { Auto } from '../../../domain/auto.entity';
 import { EstadoAuto, Marca, Color, Transmision } from '../../../domain/auto.enum';
 import { TipoEntidad } from '../../../../shared/entities/historial.entity';
+import { CambiarEstadoAutoDto } from '@autos/application/dtos/autos/cambio-estado/cambiar-estado-auto.dto';
 
 describe('CambiarEstadoAutoUseCase', () => {
   let useCase: CambiarEstadoAutoUseCase;
@@ -38,6 +39,7 @@ describe('CambiarEstadoAutoUseCase', () => {
     seguridad: [],
     interior: [],
     entretenimiento: [],
+    esFavorito: false,
     createdBy: 'user-456',
     updatedBy: 'user-456',
   });
@@ -57,6 +59,8 @@ describe('CambiarEstadoAutoUseCase', () => {
       findByMatricula: jest.fn(),
       softDelete: jest.fn(),
       restore: jest.fn(),
+      findFavoritos: jest.fn(),
+      countFavoritos: jest.fn(),
     };
 
     const mockHistorialRepository = {

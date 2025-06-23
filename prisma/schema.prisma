@@ -122,6 +122,7 @@ model Auto {
   seguridad                 String[]
   interior                  String[]
   entretenimiento           String[]
+  esFavorito                Boolean  @default(false)
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt
   createdBy                 String

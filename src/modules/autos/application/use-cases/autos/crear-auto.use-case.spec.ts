@@ -30,13 +30,13 @@ describe('CrearAutoUseCase', () => {
     estado: EstadoAuto.DISPONIBLE,
     color: Color.BLANCO,
     imagenes: ['https://example.com/image1.jpg'],
-    equipamientoDestacado: ['GPS'],
+    equipamientoDestacado: ['GPS', 'Bluetooth'],
     caracteristicasGenerales: ['4 puertas'],
     exterior: ['Espejos eléctricos'],
     confort: ['Aire acondicionado'],
-    seguridad: ['ABS'],
-    interior: ['Tapizado'],
-    entretenimiento: ['Radio'],
+    seguridad: ['ABS', 'Airbags'],
+    interior: ['Tapizado de cuero'],
+    entretenimiento: ['Radio AM/FM'],
   };
 
   beforeEach(async () => {
@@ -50,6 +50,8 @@ describe('CrearAutoUseCase', () => {
       findByMatricula: jest.fn(),
       softDelete: jest.fn(),
       restore: jest.fn(),
+      findFavoritos: jest.fn(),
+      countFavoritos: jest.fn(),
     };
 
     // Crear mock del historial repository

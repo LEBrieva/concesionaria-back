@@ -34,4 +34,24 @@ export class PrismaAutoRepository extends BaseRepository<Auto, PrismaAuto> imple
     const data = await this.prisma.auto.findUnique({ where: { matricula } });
     return data ? AutoPrismaMapper.toDomain(data) : null;
   }
+
+  async findFavoritos(): Promise<Auto[]> {
+    const data = await this.prisma.auto.findMany({
+      where: { 
+        esFavorito: true,
+        active: true
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+    return data.map(AutoPrismaMapper.toDomain);
+  }
+
+  async countFavoritos(): Promise<number> {
+    return await this.prisma.auto.count({
+      where: { 
+        esFavorito: true,
+        active: true
+      },
+    });
+  }
 }
