@@ -1,10 +1,11 @@
-import { Body, Controller, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { CrearAutoDTO } from '@autos/application/dtos/autos/crear/crear-auto.dto';
 import { CrearAutoUseCase } from '@autos/application/use-cases/autos/crear-auto.use-case';
 import { AutoMapper } from '@autos/application/mappers/auto-to-http.mapper';
 import { AutoResponseDTO } from '@autos/application/dtos/autos/crear/crear-auto-response.dto';
 import { ActualizarAutoDTO } from '@autos/application/dtos/autos/actualizar/actualizar-auto.dto';
 import { ActualizarAutoUseCase } from '@autos/application/use-cases/autos/actualizar-auto.use-case';
+import { AutoQueryService } from '@autos/application/services/auto-query.service';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/infrastructure/guards/roles.guard';
 import { Roles } from '../../../auth/infrastructure/decorators/roles.decorator';
@@ -18,6 +19,7 @@ export class AutoController {
   constructor(
     private readonly crearAutoUseCase: CrearAutoUseCase,
     private readonly actualizarAutoUseCase: ActualizarAutoUseCase,
+    private readonly autoQueryService: AutoQueryService,
   ) {}
 
   @Post()
@@ -41,5 +43,28 @@ export class AutoController {
     return AutoMapper.toHttp(
       await this.actualizarAutoUseCase.execute(id, body, user.id),
     );
+  }
+
+  // 🚀 NUEVOS ENDPOINTS QUE USAN MÉTODOS GENÉRICOS
+
+  @Get()
+  async findAll(): Promise<AutoResponseDTO[]> {
+    const autos = await this.autoQueryService.findAll();
+    return autos.map(AutoMapper.toHttp);
+  }
+
+  @Get('activos')
+  async findAllActive(): Promise<AutoResponseDTO[]> {
+    const autos = await this.autoQueryService.findAllActive();
+    return autos.map(AutoMapper.toHttp);
+  }
+
+  @Get(':id')
+  async findById(@Param('id') id: string): Promise<AutoResponseDTO> {
+    const auto = await this.autoQueryService.findById(id);
+    if (!auto) {
+      throw new Error('Auto no encontrado');
+    }
+    return AutoMapper.toHttp(auto);
   }
 }

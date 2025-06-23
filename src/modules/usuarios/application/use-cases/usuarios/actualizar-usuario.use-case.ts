@@ -12,7 +12,7 @@ export class ActualizarUsuarioUseCase {
   ) {}
 
   async execute(id: string, dto: ActualizarUsuarioDto, userId: string): Promise<Usuario> {
-    const usuario = await this.usuarioRepo.obtenerPorId(id);
+    const usuario = await this.usuarioRepo.findOneById(id);
     if (!usuario) throw new NotFoundException('Usuario no encontrado');
 
     // Si se está actualizando la contraseña, encriptarla

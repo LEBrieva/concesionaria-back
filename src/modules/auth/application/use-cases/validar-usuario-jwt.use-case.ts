@@ -15,7 +15,7 @@ export class ValidarUsuarioJwtUseCase {
     }
 
     // Verificar si el usuario existe y está activo
-    const usuario = await this.usuarioRepository.obtenerPorId(userId);
+    const usuario = await this.usuarioRepository.findOneById(userId);
     if (!usuario) {
       throw new UnauthorizedException('Usuario no encontrado o inactivo');
     }

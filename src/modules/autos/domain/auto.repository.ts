@@ -1,9 +1,8 @@
 import { Auto } from './auto.entity';
+import { IBaseRepository } from '../../shared/interfaces/base-repository.interface';
 
-export interface IAutoRepository {
+export interface IAutoRepository extends IBaseRepository<Auto> {
   save(auto: Auto): Promise<void>;
   update(id: string, auto: Auto): Promise<void>;
-  findById(id: string): Promise<Auto | null>;
-  findAll(): Promise<Auto[]>;
   findByMatricula(matricula: string): Promise<Auto | null>;
 }
