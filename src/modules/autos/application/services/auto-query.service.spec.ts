@@ -3,7 +3,7 @@ import { AutoQueryService } from './auto-query.service';
 import { IAutoRepository } from '../../domain/auto.repository';
 import { Auto } from '../../domain/auto.entity';
 import { Marca, EstadoAuto, Transmision, Color } from '../../domain/auto.enum';
-import { AutoProps } from '../../domain/auto.interfaces';
+import { AutoProps } from '../../domain/interfaces/auto.interfaces';
 
 describe('AutoQueryService', () => {
   let service: AutoQueryService;

@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { BaseEntity } from '../entities/base.entity';
-import { IBaseRepository } from '../interfaces/base-repository.interface';
+import { IBaseRepository, BaseFilters } from '../interfaces/base-repository.interface';
+import { BasePaginationResult } from '../dtos/pagination.dto';
 
 @Injectable()
 export abstract class BaseRepository<T extends BaseEntity, TPrisma = any> 
@@ -60,6 +61,44 @@ export abstract class BaseRepository<T extends BaseEntity, TPrisma = any>
         updatedAt: new Date()
       },
     });
+  }
+
+  async findWithPagination(
+    page: number,
+    limit: number,
+    filters: BaseFilters = {},
+    orderBy: string = 'createdAt',
+    orderDirection: 'asc' | 'desc' = 'desc'
+  ): Promise<BasePaginationResult<T>> {
+    const skip = (page - 1) * limit;
+    const prismaTable = this.getPrismaTable();
+    
+    // Construir where clause básico
+    const where: any = {};
+    
+    if (!filters.incluirEliminados) {
+      where.active = true;
+    }
+
+    // Configurar ordenamiento
+    const orderByClause: any = {};
+    orderByClause[orderBy] = orderDirection;
+
+    // Ejecutar consultas en paralelo
+    const [data, total] = await Promise.all([
+      prismaTable.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: orderByClause,
+      }),
+      prismaTable.count({ where }),
+    ]);
+
+    return {
+      data: data.map((item: any) => this.toDomain(item)),
+      total,
+    };
   }
 
   // Método helper para obtener la tabla de Prisma dinámicamente
