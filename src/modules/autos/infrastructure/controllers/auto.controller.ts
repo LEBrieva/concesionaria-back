@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards, Query } from '@nestjs/common';
 import { CrearAutoDTO } from '@autos/application/dtos/autos/crear/crear-auto.dto';
 import { CrearAutoUseCase } from '@autos/application/use-cases/autos/crear-auto.use-case';
 import { AutoMapper } from '@autos/application/mappers/auto-to-http.mapper';
@@ -19,6 +19,9 @@ import { AuthenticatedUser } from '../../../auth/domain/interfaces/authenticated
 import { RolUsuario } from '../../../usuarios/domain/usuario.enum';
 import { CambiarEstadoAutoDto, CambiarEstadoAutoResponseDto } from '../../application/dtos/autos/cambio-estado/cambiar-estado-auto.dto';
 import { GestionarFavoritoDto } from '../../application/dtos/autos/favoritos/gestionar-favorito.dto';
+import { AutoPaginationDto } from '../../application/dtos/autos/pagination/auto-pagination.dto';
+import { MarcasDisponiblesResponseDto } from '../../application/dtos/autos/marcas/marcas-disponibles.dto';
+import { PaginatedResponseDto, BasePaginationDto } from '../../../shared/dtos/pagination.dto';
 
 @Controller('autos')
 @UseGuards(JwtAuthGuard)
@@ -168,5 +171,37 @@ export class AutoController {
       throw new Error('Auto no encontrado');
     }
     return AutoMapper.toHttp(auto);
+  }
+
+  // 📊 NUEVOS ENDPOINTS DE PAGINACIÓN Y FILTROS
+  /**
+   * Endpoint para paginación con filtros avanzados específicos de autos
+   * Usado por el dashboard administrativo
+   */
+  @Get('paginated/advanced')
+  @UseGuards(RolesGuard)
+  @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR)
+  async findWithAdvancedFilters(
+    @Query() filters: AutoPaginationDto
+  ): Promise<PaginatedResponseDto<AutoResponseDTO>> {
+    const result = await this.autoQueryService.findWithAdvancedFilters(filters);
+    
+    return new PaginatedResponseDto(
+      result.data.map(AutoMapper.toHttp),
+      result.pagination.page,
+      result.pagination.limit,
+      result.pagination.total
+    );
+  }
+
+  /**
+   * Endpoint para obtener marcas disponibles
+   * Usado para llenar dropdowns de filtros
+   */
+  @Get('marcas/disponibles')
+  @UseGuards(RolesGuard)
+  @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR)
+  async getMarcasDisponibles(): Promise<MarcasDisponiblesResponseDto> {
+    return this.autoQueryService.getMarcasDisponibles();
   }
 }

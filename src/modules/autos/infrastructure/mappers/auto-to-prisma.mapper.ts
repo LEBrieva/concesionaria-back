@@ -1,7 +1,7 @@
 import { Auto } from '@autos/domain/auto.entity';
 import { Auto as PrismaAuto } from '@prisma/client';
 import { EstadoAuto, Transmision, Color, Marca } from '@autos/domain/auto.enum';
-import { AutoProps } from '@autos/domain/auto.interfaces';
+import { AutoProps } from '@autos/domain/interfaces/auto.interfaces';
 
 export class AutoPrismaMapper {
   static toPrisma(auto: Auto): PrismaAuto {

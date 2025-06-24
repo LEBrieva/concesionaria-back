@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Patch, Post, Put, Param, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Patch, Post, Put, Param, UseGuards, Query } from '@nestjs/common';
 import { CrearUsuarioDto } from '../../application/dtos/usuarios/crear/crear-usuario.dto';
 import { CrearUsuarioResponseDto } from '../../application/dtos/usuarios/crear/crear-usuario-response.dto';
 import { ActualizarPasswordDto } from '../../application/dtos/usuarios/actualizar/actualizar-password.dto';
@@ -16,6 +16,8 @@ import { Roles } from '../../../auth/infrastructure/decorators/roles.decorator';
 import { CurrentUser } from '../../../auth/infrastructure/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../../../auth/domain/interfaces/authenticated-user.interface';
 import { RolUsuario } from '../../domain/usuario.enum';
+import { UsuarioPaginationDto } from '../../application/dtos/usuarios/pagination/usuario-pagination.dto';
+import { PaginatedResponseDto, BasePaginationDto } from '../../../shared/dtos/pagination.dto';
 
 @Controller('usuarios')
 export class UsuarioController {
@@ -122,5 +124,47 @@ export class UsuarioController {
       throw new Error('Usuario no encontrado');
     }
     return UsuarioToHttpMapper.toCrearUsuarioResponse(usuario);
+  }
+
+  // 📊 NUEVOS ENDPOINTS DE PAGINACIÓN Y FILTROS
+
+  /**
+   * Endpoint para paginación básica de usuarios (sin filtros específicos)
+   * Usa el sistema genérico de paginación
+   */
+  @Get('paginated/basic')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR)
+  async findWithBasicPagination(
+    @Query() paginationDto: BasePaginationDto
+  ): Promise<PaginatedResponseDto<CrearUsuarioResponseDto>> {
+    const result = await this.usuarioQueryService.findWithBasicPagination(paginationDto);
+    
+    return new PaginatedResponseDto(
+      result.data.map(UsuarioToHttpMapper.toCrearUsuarioResponse),
+      result.pagination.page,
+      result.pagination.limit,
+      result.pagination.total
+    );
+  }
+
+  /**
+   * Endpoint para paginación con filtros avanzados específicos de usuarios
+   * Usado por el dashboard administrativo
+   */
+  @Get('paginated/advanced')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR)
+  async findWithAdvancedFilters(
+    @Query() filters: UsuarioPaginationDto
+  ): Promise<PaginatedResponseDto<CrearUsuarioResponseDto>> {
+    const result = await this.usuarioQueryService.findWithAdvancedFilters(filters);
+    
+    return new PaginatedResponseDto(
+      result.data.map(UsuarioToHttpMapper.toCrearUsuarioResponse),
+      result.pagination.page,
+      result.pagination.limit,
+      result.pagination.total
+    );
   }
 } 
