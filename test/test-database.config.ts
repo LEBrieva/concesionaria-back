@@ -2,12 +2,12 @@
  * CONFIGURACIÓN DE BASE DE DATOS EXCLUSIVA PARA TESTS E2E
  * 
  * ⚠️  IMPORTANTE: Esta BD es SOLO para tests, nunca usar la de desarrollo
- * 🗄️  Crea una BD separada llamada "concesionaria_test" 
- * 🔧  Modifica la URL según tu configuración local/remota
+ * 🗄️  Usa BD Neon exclusiva para tests tanto en local como en CI
+ * 🔧  Misma configuración en todos los entornos para consistencia
  */
 
 // 🚨 HARDCODEADO: URL de BD exclusiva para tests (Neon)
-export const TEST_DATABASE_URL = "postgresql://concesionariadb_owner:npg_q0uhkIiDcZ9V@ep-black-mountain-ac9fgd6h-pooler.sa-east-1.aws.neon.tech/concesionariadb?sslmode=require";
+export const TEST_DATABASE_URL = "postgresql://concesionariadb_owner:npg_q0uhkIiDcZ9V@ep-patient-lake-acbkiclt-pooler.sa-east-1.aws.neon.tech/concesionariadb?sslmode=require&channel_binding=require";
 
 // ⚠️ IMPORTANTE: Esta es la BD de TEST - NO la de desarrollo
 // 🔒 Verificar que sea diferente a la BD de desarrollo
@@ -17,7 +17,7 @@ export const TEST_DATABASE_URL = "postgresql://concesionariadb_owner:npg_q0uhkIi
  * Sobrescribe la variable de entorno para usar la BD de test
  */
 export function setupTestDatabase() {
-  // Forzar uso de BD de test
+  // Forzar uso de BD de test Neon
   process.env.DATABASE_URL = TEST_DATABASE_URL;
   
   console.log('🧪 Usando BD de test:', TEST_DATABASE_URL);
@@ -44,16 +44,16 @@ export function verifyTestDatabase() {
     `);
   }
   
-  // Verificar que es la BD de Neon correcta
-  if (!currentUrl.includes('ep-black-mountain-ac9fgd6h')) {
+  // Verificar que es la BD de test Neon correcta
+  if (!currentUrl.includes('ep-patient-lake-acbkiclt')) {
     throw new Error(`
       🚨 ERROR: BD de test no reconocida
       
-      ❌ La URL no corresponde a la BD de test de Neon configurada
+      ❌ La URL no corresponde a la BD de test Neon configurada
       ✅ Verificar configuración en test-database.config.ts
     `);
   }
   
   console.log('🔒 Verificación de seguridad: BD de test Neon confirmada');
-  console.log('✅ Endpoint:', 'ep-black-mountain-ac9fgd6h-pooler.sa-east-1.aws.neon.tech');
+  console.log('✅ Endpoint: ep-patient-lake-acbkiclt-pooler.sa-east-1.aws.neon.tech');
 } 

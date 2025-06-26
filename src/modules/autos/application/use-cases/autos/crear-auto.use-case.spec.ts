@@ -52,6 +52,9 @@ describe('CrearAutoUseCase', () => {
       restore: jest.fn(),
       findFavoritos: jest.fn(),
       countFavoritos: jest.fn(),
+      findWithPagination: jest.fn(),
+      findWithAdvancedFilters: jest.fn(),
+      getMarcasDisponibles: jest.fn(),
     };
 
     // Crear mock del historial repository
@@ -65,6 +68,7 @@ describe('CrearAutoUseCase', () => {
       findOneById: jest.fn(),
       softDelete: jest.fn(),
       restore: jest.fn(),
+      findWithPagination: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

@@ -1,4 +1,4 @@
-name: CI
+name: Build, Tests & Deploys
 
 on:
   push:
@@ -7,9 +7,15 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  build-test-deploy:
     name: Build, Tests & Deploys
     runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: "postgresql://concesionariadb_owner:npg_q0uhkIiDcZ9V@ep-patient-lake-acbkiclt-pooler.sa-east-1.aws.neon.tech/concesionariadb?sslmode=require&channel_binding=require"
+      NODE_ENV: test
+      JWT_SECRET: "mi-secreto-super-seguro"
+      FIREBASE_PROJECT_ID: "test-project"
 
     steps:
       - name: 📥 Clonar repositorio
@@ -29,10 +35,17 @@ jobs:
       - name: 🛠 Compilar proyecto
         run: yarn build
 
-      #- name: 🧪 Ejecutar tests
-      #   run: yarn test
+      - name: 🗄️ Ejecutar migraciones de Prisma
+        run: npx prisma migrate deploy
+
+      - name: 🧪 Ejecutar tests unitarios
+        run: yarn test
+
+      - name: 🧪 Ejecutar tests e2e
+        run: yarn test:e2e
 
       # - name: 🚀 Deploy a Railway
       #   run: npx railway up
+      #   if: github.ref == 'refs/heads/main'
       #   env:
       #     RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

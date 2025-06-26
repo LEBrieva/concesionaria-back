@@ -4,7 +4,7 @@ import { GestionarFavoritoUseCase } from './gestionar-favorito.use-case';
 import { IAutoRepository } from '@autos/domain/auto.repository';
 import { HistorialService } from '../../../../shared/services/historial.service';
 import { Auto } from '@autos/domain/auto.entity';
-import { AutoProps } from '@autos/domain/auto.interfaces';
+import { AutoProps } from '@autos/domain/interfaces/auto.interfaces';
 import { Marca, EstadoAuto, Transmision, Color } from '@autos/domain/auto.enum';
 import { GestionarFavoritoDto } from '@autos/application/dtos/autos/favoritos/gestionar-favorito.dto';
 

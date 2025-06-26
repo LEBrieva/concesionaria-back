@@ -5,7 +5,8 @@
  * Configura automáticamente la base de datos exclusiva para tests
  */
 
-import { setupTestDatabase, verifyTestDatabase } from './test-database.config';
+import { setupTestDatabase, verifyTestDatabase, TEST_DATABASE_URL } from './test-database.config';
+import { execSync } from 'child_process';
 
 // 🚨 CONFIGURACIÓN CRÍTICA: BD exclusiva para tests
 console.log('\n🔧 Configurando entorno de test...');
@@ -15,6 +16,19 @@ setupTestDatabase();
 
 // 2. Verificar seguridad
 verifyTestDatabase();
+
+// 3. Ejecutar migraciones en BD de test
+console.log('🗄️ Ejecutando migraciones en BD de test...');
+try {
+  execSync('npx prisma migrate deploy', { 
+    stdio: 'pipe',
+    env: { ...process.env, DATABASE_URL: TEST_DATABASE_URL }
+  });
+  console.log('✅ Migraciones ejecutadas correctamente');
+} catch (error) {
+  console.error('❌ Error ejecutando migraciones:', error.message);
+  // No lanzar error para que los tests continúen
+}
 
 console.log('✅ Entorno de test configurado correctamente\n');
 

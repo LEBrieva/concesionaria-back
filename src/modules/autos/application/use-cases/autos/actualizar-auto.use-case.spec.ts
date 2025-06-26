@@ -5,7 +5,7 @@ import { IAutoRepository } from '../../../domain/auto.repository';
 import { ActualizarAutoDTO } from '../../dtos/autos/actualizar/actualizar-auto.dto';
 import { Auto } from '../../../domain/auto.entity';
 import { Marca, EstadoAuto, Transmision, Color } from '../../../domain/auto.enum';
-import { AutoProps } from '../../../domain/auto.interfaces';
+import { AutoProps } from '../../../domain/interfaces/auto.interfaces';
 import { HistorialService } from '../../../../shared/services/historial.service';
 import { IHistorialRepository } from '../../../../shared/interfaces/historial-repository.interface';
 import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
@@ -65,6 +65,9 @@ describe('ActualizarAutoUseCase', () => {
       restore: jest.fn(),
       findFavoritos: jest.fn(),
       countFavoritos: jest.fn(),
+      findWithPagination: jest.fn(),
+      findWithAdvancedFilters: jest.fn(),
+      getMarcasDisponibles: jest.fn(),
     };
 
     mockHistorialRepository = {
@@ -77,6 +80,7 @@ describe('ActualizarAutoUseCase', () => {
       findOneById: jest.fn(),
       softDelete: jest.fn(),
       restore: jest.fn(),
+      findWithPagination: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

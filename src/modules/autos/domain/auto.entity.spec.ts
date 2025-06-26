@@ -1,6 +1,6 @@
 import { Auto } from './auto.entity';
 import { Marca, EstadoAuto, Transmision, Color } from './auto.enum';
-import { AutoProps } from './auto.interfaces';
+import { AutoProps } from './interfaces/auto.interfaces';
 
 describe('Auto Entity', () => {
   const validAutoProps: AutoProps = {
