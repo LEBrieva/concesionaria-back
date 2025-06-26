@@ -11,24 +11,11 @@ jobs:
     name: Tests
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:13
-        env:
-          POSTGRES_PASSWORD: test_password
-          POSTGRES_USER: test_user
-          POSTGRES_DB: concesionaria_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5433:5432
-
     env:
-      DATABASE_URL: "postgresql://test_user:test_password@localhost:5433/concesionaria_test"
+      DATABASE_URL: "postgresql://concesionariadb_owner:npg_q0uhkIiDcZ9V@ep-patient-lake-acbkiclt-pooler.sa-east-1.aws.neon.tech/concesionariadb?sslmode=require&channel_binding=require"
       NODE_ENV: test
+      JWT_SECRET: "mi-secreto-super-seguro"
+      FIREBASE_PROJECT_ID: "test-project"
 
     steps:
       - name: 📥 Clonar repositorio
