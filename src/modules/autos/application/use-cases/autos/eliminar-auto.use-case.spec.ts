@@ -55,6 +55,9 @@ describe('EliminarAutoUseCase', () => {
       findByMatricula: jest.fn(),
       findFavoritos: jest.fn(),
       countFavoritos: jest.fn(),
+      findWithPagination: jest.fn(),
+      findWithAdvancedFilters: jest.fn(),
+      getMarcasDisponibles: jest.fn(),
     };
 
     const mockHistorial = {

@@ -4,6 +4,7 @@ import { IUsuarioRepository } from '../../domain/usuario.repository';
 import { Usuario } from '../../domain/usuario.entity';
 import { RolUsuario } from '../../domain/usuario.enum';
 import { UsuarioProps } from '../../domain/usuario.interfaces';
+import { PaginationService } from '../../../shared/services/pagination.service';
 
 describe('UsuarioQueryService', () => {
   let service: UsuarioQueryService;
@@ -40,12 +41,20 @@ describe('UsuarioQueryService', () => {
       eliminar: jest.fn(),
     };
 
+    const mockPaginationService = {
+      paginate: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UsuarioQueryService,
         {
           provide: 'IUsuarioRepository',
           useValue: mockUsuarioRepository,
+        },
+        {
+          provide: PaginationService,
+          useValue: mockPaginationService,
         },
       ],
     }).compile();

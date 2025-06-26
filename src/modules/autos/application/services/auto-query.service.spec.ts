@@ -4,6 +4,7 @@ import { IAutoRepository } from '../../domain/auto.repository';
 import { Auto } from '../../domain/auto.entity';
 import { Marca, EstadoAuto, Transmision, Color } from '../../domain/auto.enum';
 import { AutoProps } from '../../domain/interfaces/auto.interfaces';
+import { PaginationService } from '../../../shared/services/pagination.service';
 
 describe('AutoQueryService', () => {
   let service: AutoQueryService;
@@ -57,6 +58,13 @@ describe('AutoQueryService', () => {
       restore: jest.fn(),
       findFavoritos: jest.fn(),
       countFavoritos: jest.fn(),
+      findWithAdvancedFilters: jest.fn(),
+      getMarcasDisponibles: jest.fn(),
+      findWithPagination: jest.fn(),
+    } as any;
+
+    const mockPaginationService = {
+      paginate: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -65,6 +73,10 @@ describe('AutoQueryService', () => {
         {
           provide: 'IAutoRepository',
           useValue: mockAutoRepository,
+        },
+        {
+          provide: PaginationService,
+          useValue: mockPaginationService,
         },
       ],
     }).compile();

@@ -60,6 +60,8 @@ describe('RestaurarUsuarioUseCase', () => {
       findAll: jest.fn(),
       findAllActive: jest.fn(),
       eliminar: jest.fn(),
+      findWithPagination: jest.fn(),
+      findWithAdvancedFilters: jest.fn(),
     };
 
     mockHistorialRepository = {
@@ -72,6 +74,7 @@ describe('RestaurarUsuarioUseCase', () => {
       findOneById: jest.fn(),
       softDelete: jest.fn(),
       restore: jest.fn(),
+      findWithPagination: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

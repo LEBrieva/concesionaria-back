@@ -80,6 +80,7 @@ describe('CrearUsuarioUseCase', () => {
       findOneById: jest.fn(),
       softDelete: jest.fn(),
       restore: jest.fn(),
+      findWithPagination: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

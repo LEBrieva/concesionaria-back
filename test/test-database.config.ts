@@ -7,7 +7,7 @@
  */
 
 // 🚨 HARDCODEADO: URL de BD exclusiva para tests (Neon)
-export const TEST_DATABASE_URL = "postgresql://concesionariadb_owner:npg_q0uhkIiDcZ9V@ep-black-mountain-ac9fgd6h-pooler.sa-east-1.aws.neon.tech/concesionariadb?sslmode=require";
+export const TEST_DATABASE_URL = "postgresql://concesionariadb_owner:npg_q0uhkIiDcZ9V@ep-patient-lake-acbkiclt-pooler.sa-east-1.aws.neon.tech/concesionariadb?sslmode=require&channel_binding=require";
 
 // ⚠️ IMPORTANTE: Esta es la BD de TEST - NO la de desarrollo
 // 🔒 Verificar que sea diferente a la BD de desarrollo
@@ -45,7 +45,7 @@ export function verifyTestDatabase() {
   }
   
   // Verificar que es la BD de Neon correcta
-  if (!currentUrl.includes('ep-black-mountain-ac9fgd6h')) {
+  if (!currentUrl.includes('ep-patient-lake-acbkiclt')) {
     throw new Error(`
       🚨 ERROR: BD de test no reconocida
       
@@ -55,5 +55,5 @@ export function verifyTestDatabase() {
   }
   
   console.log('🔒 Verificación de seguridad: BD de test Neon confirmada');
-  console.log('✅ Endpoint:', 'ep-black-mountain-ac9fgd6h-pooler.sa-east-1.aws.neon.tech');
+  console.log('✅ Endpoint:', 'ep-patient-lake-acbkiclt-pooler.sa-east-1.aws.neon.tech');
 } 
