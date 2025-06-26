@@ -7,9 +7,28 @@ on:
     branches: [main]
 
 jobs:
-  build:
-    name: Build, Tests & Deploys
+  test:
+    name: Tests
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_USER: test_user
+          POSTGRES_DB: concesionaria_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5433:5432
+
+    env:
+      DATABASE_URL: "postgresql://test_user:test_password@localhost:5433/concesionaria_test"
+      NODE_ENV: test
 
     steps:
       - name: 📥 Clonar repositorio
@@ -29,8 +48,38 @@ jobs:
       - name: 🛠 Compilar proyecto
         run: yarn build
 
-      #- name: 🧪 Ejecutar tests
-      #   run: yarn test
+      - name: 🗄️ Ejecutar migraciones de Prisma
+        run: npx prisma migrate deploy
+
+      - name: 🧪 Ejecutar tests unitarios
+        run: yarn test
+
+      - name: 🧪 Ejecutar tests e2e
+        run: yarn test:e2e
+
+  build:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: 📥 Clonar repositorio
+        uses: actions/checkout@v3
+
+      - name: 🟢 Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.16.0
+
+      - name: 🔧 Habilitar Corepack
+        run: corepack enable
+
+      - name: 📦 Instalar dependencias
+        run: yarn install
+
+      - name: 🛠 Compilar proyecto
+        run: yarn build
 
       # - name: 🚀 Deploy a Railway
       #   run: npx railway up
