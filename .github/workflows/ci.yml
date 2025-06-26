@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  test:
-    name: Tests
+  build-test-deploy:
+    name: Build, Tests & Deploys
     runs-on: ubuntu-latest
 
     env:
@@ -44,31 +44,8 @@ jobs:
       - name: 🧪 Ejecutar tests e2e
         run: yarn test:e2e
 
-  build:
-    name: Build & Deploy
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.ref == 'refs/heads/main' || github.base_ref == 'main'
-
-    steps:
-      - name: 📥 Clonar repositorio
-        uses: actions/checkout@v3
-
-      - name: 🟢 Configurar Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20.16.0
-
-      - name: 🔧 Habilitar Corepack
-        run: corepack enable
-
-      - name: 📦 Instalar dependencias
-        run: yarn install
-
-      - name: 🛠 Compilar proyecto
-        run: yarn build
-
       # - name: 🚀 Deploy a Railway
       #   run: npx railway up
+      #   if: github.ref == 'refs/heads/main'
       #   env:
       #     RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
