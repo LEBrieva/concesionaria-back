@@ -3,10 +3,10 @@ import { EstadoAuto } from '../../../../domain/auto.enum';
 
 export class CambiarEstadoAutoDto {
   @IsEnum(EstadoAuto, {
-    message: 'El estado debe ser DISPONIBLE o RESERVADO',
+    message: 'El estado debe ser DISPONIBLE, RESERVADO o VENDIDO',
   })
   @IsNotEmpty({ message: 'El nuevo estado es requerido' })
-  nuevoEstado: EstadoAuto.DISPONIBLE | EstadoAuto.RESERVADO;
+  nuevoEstado: EstadoAuto.DISPONIBLE | EstadoAuto.RESERVADO | EstadoAuto.VENDIDO;
 
   @IsString({ message: 'Las observaciones deben ser un texto' })
   @IsNotEmpty({ message: 'Las observaciones son requeridas' })
@@ -25,4 +25,6 @@ export class CambiarEstadoAutoResponseDto {
   usuarioId: string;
   historialId: string;
   mensaje: string;
+  favoritoDesactivado?: boolean;
+  mensajeFavorito?: string;
 } 
