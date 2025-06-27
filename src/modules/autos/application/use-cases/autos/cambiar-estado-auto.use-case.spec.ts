@@ -203,8 +203,20 @@ describe('CambiarEstadoAutoUseCase', () => {
         })
       );
 
-      // Verificar que se registren ambos cambios en el historial
-      expect(historialRepository.crear).toHaveBeenCalledTimes(2);
+      // Verificar que se registre el cambio en el historial (1 llamada con metadata del favorito)
+      expect(historialRepository.crear).toHaveBeenCalledTimes(1);
+      
+      // Verificar que se registró el cambio de estado con metadata del favorito
+      expect(historialRepository.crear).toHaveBeenCalledWith(
+        expect.objectContaining({
+          campoAfectado: 'estado',
+          valorAnterior: EstadoAuto.DISPONIBLE,
+          valorNuevo: EstadoAuto.VENDIDO,
+          metadata: expect.objectContaining({
+            favoritoDesactivado: true,
+          }),
+        })
+      );
       
       expect(result).toEqual({
         id: 'auto-123',
@@ -249,6 +261,18 @@ describe('CambiarEstadoAutoUseCase', () => {
 
       expect(result.favoritoDesactivado).toBe(true);
       expect(result.mensajeFavorito).toBe('El vehículo fue desmarcado como favorito automáticamente al cambiar a estado RESERVADO');
+      
+      // Verificar que se registre el cambio en el historial con metadata del favorito
+      expect(historialRepository.crear).toHaveBeenCalledWith(
+        expect.objectContaining({
+          campoAfectado: 'estado',
+          valorAnterior: EstadoAuto.DISPONIBLE,
+          valorNuevo: EstadoAuto.RESERVADO,
+          metadata: expect.objectContaining({
+            favoritoDesactivado: true,
+          }),
+        })
+      );
     });
 
     it('NO debería desmarcar favorito cuando se cambia a DISPONIBLE', async () => {
