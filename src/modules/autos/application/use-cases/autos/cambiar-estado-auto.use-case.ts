@@ -37,10 +37,10 @@ export class CambiarEstadoAutoUseCase {
     }
 
     // 4. Validar que solo se permitan ciertos estados como destino
-    const estadosPermitidos = [EstadoAuto.DISPONIBLE, EstadoAuto.RESERVADO];
+    const estadosPermitidos = [EstadoAuto.DISPONIBLE, EstadoAuto.RESERVADO, EstadoAuto.VENDIDO];
     if (!estadosPermitidos.includes(dto.nuevoEstado)) {
       throw new BadRequestException(
-        'Solo se permite cambiar a estados DISPONIBLE o RESERVADO'
+        'Solo se permite cambiar a estados DISPONIBLE, RESERVADO o VENDIDO'
       );
     }
 
@@ -48,16 +48,22 @@ export class CambiarEstadoAutoUseCase {
     this.validarTransicionEstado(auto.estado, dto.nuevoEstado);
 
     const estadoAnterior = auto.estado;
+    const eraFavorito = auto.esFavorito;
 
-    // 6. Actualizar el estado del auto
+    // 6. Determinar si se debe desmarcar el favorito
+    const debeDesmarcarFavorito = eraFavorito && 
+      (dto.nuevoEstado === EstadoAuto.VENDIDO || dto.nuevoEstado === EstadoAuto.RESERVADO);
+
+    // 7. Actualizar el estado del auto (y favorito si es necesario)
     const autoActualizado = auto.actualizarCon({
       estado: dto.nuevoEstado,
+      esFavorito: debeDesmarcarFavorito ? false : auto.esFavorito,
       updatedBy: usuarioId,
     });
 
     await this.autoRepository.update(autoId, autoActualizado);
 
-    // 7. Registrar el cambio en el historial con enriquecimiento automático
+    // 8. Registrar el cambio en el historial con enriquecimiento automático
     const historial = await this.historialService.registrarCambioEstado({
       entidadId: autoId,
       tipoEntidad: TipoEntidad.AUTO,
@@ -74,10 +80,11 @@ export class CambiarEstadoAutoUseCase {
           marca: auto.marca,
           modelo: auto.modelo,
         },
+        favoritoDesactivado: debeDesmarcarFavorito,
       },
     });
 
-    // 8. Retornar respuesta
+    // 10. Retornar respuesta
     return {
       id: autoId,
       estadoAnterior,
@@ -87,15 +94,26 @@ export class CambiarEstadoAutoUseCase {
       usuarioId,
       historialId: historial.id,
       mensaje: this.generarMensajeExito(estadoAnterior, dto.nuevoEstado),
+      favoritoDesactivado: debeDesmarcarFavorito,
+      mensajeFavorito: debeDesmarcarFavorito ? 
+        `El vehículo fue desmarcado como favorito automáticamente al cambiar a estado ${dto.nuevoEstado}` : 
+        undefined,
     };
   }
 
   private validarTransicionEstado(estadoActual: EstadoAuto, nuevoEstado: EstadoAuto): void {
+    // Validación crítica: Un auto VENDIDO no puede cambiar de estado
+    if (estadoActual === EstadoAuto.VENDIDO) {
+      throw new BadRequestException(
+        'No se puede cambiar el estado de un auto que ya está VENDIDO. El estado VENDIDO es final.'
+      );
+    }
+
     // Definir transiciones válidas
     const transicionesValidas: Record<EstadoAuto, EstadoAuto[]> = {
-      [EstadoAuto.POR_INGRESAR]: [EstadoAuto.DISPONIBLE, EstadoAuto.RESERVADO], // Desde POR_INGRESAR puede ir a cualquiera
-      [EstadoAuto.DISPONIBLE]: [EstadoAuto.RESERVADO], // Desde DISPONIBLE solo a RESERVADO
-      [EstadoAuto.RESERVADO]: [EstadoAuto.DISPONIBLE], // Desde RESERVADO solo a DISPONIBLE
+      [EstadoAuto.POR_INGRESAR]: [EstadoAuto.DISPONIBLE, EstadoAuto.RESERVADO, EstadoAuto.VENDIDO],
+      [EstadoAuto.DISPONIBLE]: [EstadoAuto.RESERVADO, EstadoAuto.VENDIDO],
+      [EstadoAuto.RESERVADO]: [EstadoAuto.DISPONIBLE, EstadoAuto.VENDIDO],
       [EstadoAuto.VENDIDO]: [], // No se puede cambiar desde VENDIDO (estado final)
     };
 
@@ -113,6 +131,8 @@ export class CambiarEstadoAutoUseCase {
       return 'El vehículo ha sido marcado como disponible para la venta';
     } else if (estadoNuevo === EstadoAuto.RESERVADO) {
       return 'El vehículo ha sido reservado exitosamente';
+    } else if (estadoNuevo === EstadoAuto.VENDIDO) {
+      return 'El vehículo ha sido marcado como vendido exitosamente';
     }
     
     return `Estado cambiado de ${estadoAnterior} a ${estadoNuevo}`;
