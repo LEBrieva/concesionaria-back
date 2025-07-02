@@ -11,6 +11,8 @@ import { RestaurarAutoUseCase } from './application/use-cases/autos/restaurar-au
 import { CambiarEstadoAutoUseCase } from './application/use-cases/autos/cambiar-estado-auto.use-case';
 import { GestionarFavoritoUseCase } from './application/use-cases/autos/gestionar-favorito.use-case';
 import { ObtenerFavoritosUseCase } from './application/use-cases/autos/obtener-favoritos.use-case';
+import { SubirImagenesAutoUseCase } from './application/use-cases/autos/subir-imagenes-auto.use-case';
+import { EliminarImagenAutoUseCase } from './application/use-cases/autos/eliminar-imagen-auto.use-case';
 import { AutoQueryService } from './application/services/auto-query.service';
 
 @Module({
@@ -24,6 +26,8 @@ import { AutoQueryService } from './application/services/auto-query.service';
     CambiarEstadoAutoUseCase,
     GestionarFavoritoUseCase,
     ObtenerFavoritosUseCase,
+    SubirImagenesAutoUseCase,
+    EliminarImagenAutoUseCase,
     AutoQueryService,
     {
       provide: 'IAutoRepository',
