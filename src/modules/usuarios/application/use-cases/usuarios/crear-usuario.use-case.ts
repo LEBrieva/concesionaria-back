@@ -1,7 +1,7 @@
 import { Injectable, ConflictException, ForbiddenException, Inject } from '@nestjs/common';
 import { Usuario } from 'src/modules/usuarios/domain/usuario.entity';
 import { IUsuarioRepository } from 'src/modules/usuarios/domain/usuario.repository';
-import { CrearUsuarioDto } from '../../dtos/usuarios/crear/crear-usuario.dto';
+import { CrearUsuarioDto } from '../../dtos/crear/crear-usuario.dto';
 import { PasswordService } from 'src/modules/shared/services/password.service';
 import { RolUsuario } from 'src/modules/usuarios/domain/usuario.enum';
 import { AuthenticatedUser } from 'src/modules/auth/domain/interfaces/authenticated-user.interface';

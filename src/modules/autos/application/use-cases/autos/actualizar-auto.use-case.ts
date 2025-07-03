@@ -1,4 +1,4 @@
-import { ActualizarAutoDTO } from '@autos/application/dtos/autos/actualizar/actualizar-auto.dto';
+import { ActualizarAutoDTO } from '@autos/application/dtos/actualizar/actualizar-auto.dto';
 import { Auto } from '@autos/domain/auto.entity';
 import { IAutoRepository } from '@autos/domain/auto.repository';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';

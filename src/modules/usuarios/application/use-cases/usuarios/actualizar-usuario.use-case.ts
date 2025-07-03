@@ -1,4 +1,4 @@
-import { ActualizarUsuarioDto } from '../../dtos/usuarios/actualizar/actualizar-usuario.dto';
+import { ActualizarUsuarioDto } from '../../dtos/actualizar/actualizar-usuario.dto';
 import { Usuario } from '../../../domain/usuario.entity';
 import { IUsuarioRepository } from '../../../domain/usuario.repository';
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';

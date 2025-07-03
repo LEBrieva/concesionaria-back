@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, Patch, Post, Put, Param, UseGuards, Query } from '@nestjs/common';
-import { CrearUsuarioDto } from '../../application/dtos/usuarios/crear/crear-usuario.dto';
-import { CrearUsuarioResponseDto } from '../../application/dtos/usuarios/crear/crear-usuario-response.dto';
-import { ActualizarPasswordDto } from '../../application/dtos/usuarios/actualizar/actualizar-password.dto';
-import { ActualizarUsuarioDto } from '../../application/dtos/usuarios/actualizar/actualizar-usuario.dto';
+import { CrearUsuarioDto } from '../../application/dtos/crear/crear-usuario.dto';
+import { CrearUsuarioResponseDto } from '../../application/dtos/crear/crear-usuario-response.dto';
+import { ActualizarPasswordDto } from '../../application/dtos/actualizar/actualizar-password.dto';
+import { ActualizarUsuarioDto } from '../../application/dtos/actualizar/actualizar-usuario.dto';
 import { CrearUsuarioUseCase } from '../../application/use-cases/usuarios/crear-usuario.use-case';
 import { ActualizarPasswordUseCase } from '../../application/use-cases/usuarios/actualizar-password.use-case';
 import { ActualizarUsuarioUseCase } from '../../application/use-cases/usuarios/actualizar-usuario.use-case';
@@ -16,7 +16,7 @@ import { Roles } from '../../../auth/infrastructure/decorators/roles.decorator';
 import { CurrentUser } from '../../../auth/infrastructure/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../../../auth/domain/interfaces/authenticated-user.interface';
 import { RolUsuario } from '../../domain/usuario.enum';
-import { UsuarioPaginationDto } from '../../application/dtos/usuarios/pagination/usuario-pagination.dto';
+import { UsuarioPaginationDto } from '../../application/dtos/pagination/usuario-pagination.dto';
 import { PaginatedResponseDto, BasePaginationDto } from '../../../shared/dtos/pagination.dto';
 
 @Controller('usuarios')

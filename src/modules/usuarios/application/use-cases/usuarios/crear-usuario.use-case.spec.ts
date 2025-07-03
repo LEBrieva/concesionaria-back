@@ -3,7 +3,7 @@ import { ConflictException, ForbiddenException } from '@nestjs/common';
 import { CrearUsuarioUseCase } from './crear-usuario.use-case';
 import { IUsuarioRepository } from '../../../domain/usuario.repository';
 import { PasswordService } from '../../../../shared/services/password.service';
-import { CrearUsuarioDto } from '../../dtos/usuarios/crear/crear-usuario.dto';
+import { CrearUsuarioDto } from '../../dtos/crear/crear-usuario.dto';
 import { RolUsuario } from '../../../domain/usuario.enum';
 import { Usuario } from '../../../domain/usuario.entity';
 import { AuthenticatedUser } from '../../../../auth/domain/interfaces/authenticated-user.interface';

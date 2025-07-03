@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, Inject } from '@nes
 import { IAutoRepository } from '../../../domain/auto.repository';
 import { HistorialService } from '../../../../shared/services/historial.service';
 import { TipoEntidad } from '../../../../shared/entities/historial.entity';
-import { CambiarEstadoAutoDto, CambiarEstadoAutoResponseDto } from '../../dtos/autos/cambio-estado/cambiar-estado-auto.dto';
+import { CambiarEstadoAutoDto, CambiarEstadoAutoResponseDto } from '../../dtos/cambio-estado/cambiar-estado-auto.dto';
 import { EstadoAuto } from '../../../domain/auto.enum';
 
 @Injectable()

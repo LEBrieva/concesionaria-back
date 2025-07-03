@@ -1,6 +1,6 @@
 import { IsOptional, IsString, IsNumber, IsEnum, IsBoolean, Min, Max, IsDateString } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
-import { BasePaginationDto } from '../../../../../shared/dtos/pagination.dto';
+import { BasePaginationDto } from '../../../../shared/dtos/pagination.dto';
 import { EstadoAuto, Marca } from '@prisma/client';
 
 export class AutoPaginationDto extends BasePaginationDto {

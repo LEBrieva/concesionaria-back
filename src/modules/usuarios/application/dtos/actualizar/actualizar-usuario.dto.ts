@@ -1,7 +1,7 @@
 import { PartialType, OmitType } from '@nestjs/mapped-types';
 import { CrearUsuarioDto } from '../crear/crear-usuario.dto';
 import { IsString, MinLength } from 'class-validator';
-import { IsOptionalNotEmpty } from '../../../../../shared/decorators/optional-not-empty.decorator';
+import { IsOptionalNotEmpty } from '../../../../shared/decorators/optional-not-empty.decorator';
 
 // Extender de CrearUsuarioDto pero omitiendo el email que no debe actualizarse
 export class ActualizarUsuarioDto extends PartialType(

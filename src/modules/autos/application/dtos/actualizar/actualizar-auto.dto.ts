@@ -1,7 +1,7 @@
 import { PartialType, OmitType } from '@nestjs/mapped-types';
 import { CrearAutoDTO } from '../crear/crear-auto.dto';
 import { IsString, Length } from 'class-validator';
-import { IsOptionalNotEmpty } from '../../../../../shared/decorators/optional-not-empty.decorator';
+import { IsOptionalNotEmpty } from '../../../../shared/decorators/optional-not-empty.decorator';
 
 // Extender de CrearAutoDTO pero omitiendo campos que no deben actualizarse
 export class ActualizarAutoDTO extends PartialType(

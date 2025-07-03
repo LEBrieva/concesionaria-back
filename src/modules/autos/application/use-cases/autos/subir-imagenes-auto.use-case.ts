@@ -2,7 +2,7 @@ import { Injectable, Inject, NotFoundException, BadRequestException, Logger } fr
 import { FirebaseStorageService } from '../../../../shared/services/firebase-storage.service';
 import { ImageUploadResult } from '../../../../shared/interfaces';
 import { IAutoRepository } from '../../../domain/auto.repository';
-import { SubirImagenesResponseDto, ImagenSubidaResponseDto } from '../../dtos/autos/imagenes/imagenes-response.dto';
+import { SubirImagenesResponseDto, ImagenSubidaResponseDto } from '../../dtos/imagenes/imagenes-response.dto';
 import { HistorialService } from '../../../../shared/services/historial.service';
 import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
 

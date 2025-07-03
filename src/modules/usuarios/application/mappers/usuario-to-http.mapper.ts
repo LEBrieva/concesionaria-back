@@ -1,5 +1,5 @@
 import { Usuario } from '../../domain/usuario.entity';
-import { CrearUsuarioResponseDto } from '../dtos/usuarios/crear/crear-usuario-response.dto';
+import { CrearUsuarioResponseDto } from '../dtos/crear/crear-usuario-response.dto';
 
 export class UsuarioToHttpMapper {
   static toCrearUsuarioResponse(usuario: Usuario): CrearUsuarioResponseDto {

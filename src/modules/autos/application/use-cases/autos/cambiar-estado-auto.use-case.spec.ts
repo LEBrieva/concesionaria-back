@@ -7,7 +7,7 @@ import { IHistorialRepository } from '../../../../shared/interfaces/historial';
 import { Auto } from '../../../domain/auto.entity';
 import { EstadoAuto, Marca, Color, Transmision } from '../../../domain/auto.enum';
 import { TipoEntidad } from '../../../../shared/entities/historial.entity';
-import { CambiarEstadoAutoDto } from '@autos/application/dtos/autos/cambio-estado/cambiar-estado-auto.dto';
+import { CambiarEstadoAutoDto } from '@autos/application/dtos/cambio-estado/cambiar-estado-auto.dto';
 
 describe('CambiarEstadoAutoUseCase', () => {
   let useCase: CambiarEstadoAutoUseCase;
