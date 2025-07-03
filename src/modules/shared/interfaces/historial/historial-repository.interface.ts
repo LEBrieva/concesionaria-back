@@ -14,4 +14,4 @@ export interface IHistorialRepository extends IBaseRepository<Historial> {
     tipoEntidad: TipoEntidad,
     limite?: number
   ): Promise<Historial[]>;
-} 
+}   
