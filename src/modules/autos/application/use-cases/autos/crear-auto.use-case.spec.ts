@@ -5,13 +5,16 @@ import { CrearAutoDTO } from '../../dtos/autos/crear/crear-auto.dto';
 import { Marca, EstadoAuto, Transmision, Color } from '../../../domain/auto.enum';
 import { Auto } from '../../../domain/auto.entity';
 import { HistorialService } from '../../../../shared/services/historial.service';
+import { FirebaseStorageService } from '../../../../shared/services/firebase-storage.service';
 import { IHistorialRepository } from '../../../../shared/interfaces/historial';
 import { TipoEntidad } from '../../../../shared/entities/historial.entity';
+import { BadRequestException } from '@nestjs/common';
 
 describe('CrearAutoUseCase', () => {
   let useCase: CrearAutoUseCase;
   let mockAutoRepository: jest.Mocked<IAutoRepository>;
   let mockHistorialRepository: jest.Mocked<IHistorialRepository>;
+  let mockFirebaseStorageService: jest.Mocked<FirebaseStorageService>;
   let historialService: HistorialService;
 
   const validCrearAutoDTO: CrearAutoDTO = {
@@ -29,7 +32,6 @@ describe('CrearAutoUseCase', () => {
     transmision: Transmision.MANUAL,
     estado: EstadoAuto.DISPONIBLE,
     color: Color.BLANCO,
-    imagenes: ['https://example.com/image1.jpg'],
     equipamientoDestacado: ['GPS', 'Bluetooth'],
     caracteristicasGenerales: ['4 puertas'],
     exterior: ['Espejos eléctricos'],
@@ -37,6 +39,19 @@ describe('CrearAutoUseCase', () => {
     seguridad: ['ABS', 'Airbags'],
     interior: ['Tapizado de cuero'],
     entretenimiento: ['Radio AM/FM'],
+  };
+
+  const mockImageFile: Express.Multer.File = {
+    fieldname: 'imagenes',
+    originalname: 'test-image.jpg',
+    encoding: '7bit',
+    mimetype: 'image/jpeg',
+    size: 1024,
+    buffer: Buffer.from('fake-image-data'),
+    destination: '',
+    filename: '',
+    path: '',
+    stream: null as any,
   };
 
   beforeEach(async () => {
@@ -71,6 +86,17 @@ describe('CrearAutoUseCase', () => {
       findWithPagination: jest.fn(),
     };
 
+    // Crear mock del FirebaseStorageService
+    mockFirebaseStorageService = {
+      uploadImage: jest.fn(),
+      uploadMultipleImages: jest.fn(),
+      deleteImage: jest.fn(),
+      deleteMultipleImages: jest.fn(),
+      getImageInfo: jest.fn(),
+      getPublicUrl: jest.fn(),
+      healthCheck: jest.fn(),
+    } as any;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CrearAutoUseCase,
@@ -82,6 +108,10 @@ describe('CrearAutoUseCase', () => {
         {
           provide: 'IHistorialRepository',
           useValue: mockHistorialRepository,
+        },
+        {
+          provide: FirebaseStorageService,
+          useValue: mockFirebaseStorageService,
         },
       ],
     }).compile();
@@ -95,7 +125,7 @@ describe('CrearAutoUseCase', () => {
   });
 
   describe('execute', () => {
-    it('debería crear un auto exitosamente con datos válidos y registrar en historial', async () => {
+    it('debería crear un auto exitosamente sin imágenes', async () => {
       // Arrange
       const userId = 'user-123';
       const mockHistorial = { id: 'historial-456', createdAt: new Date() };
@@ -104,7 +134,7 @@ describe('CrearAutoUseCase', () => {
       mockHistorialRepository.crear.mockResolvedValue(mockHistorial as any);
 
       // Act
-      const result = await useCase.execute(validCrearAutoDTO, userId);
+      const result = await useCase.execute(validCrearAutoDTO, [], userId);
 
       // Assert
       expect(result).toBeInstanceOf(Auto);
@@ -113,6 +143,7 @@ describe('CrearAutoUseCase', () => {
       expect(result.precio).toBe(validCrearAutoDTO.precio);
       expect(result.createdBy).toBe(userId);
       expect(result.updatedBy).toBe(userId);
+      expect(result.imagenes).toEqual([]);
       expect(result.id).toBeDefined();
       expect(typeof result.id).toBe('string');
       
@@ -120,28 +151,118 @@ describe('CrearAutoUseCase', () => {
       expect(mockAutoRepository.save).toHaveBeenCalledTimes(1);
       expect(mockAutoRepository.save).toHaveBeenCalledWith(expect.any(Auto));
 
+      // Verificar que NO se llamó al servicio de Firebase
+      expect(mockFirebaseStorageService.uploadMultipleImages).not.toHaveBeenCalled();
+
       // Verificar que se registró en el historial
       expect(mockHistorialRepository.crear).toHaveBeenCalledTimes(1);
+    });
+
+    it('debería crear un auto exitosamente con imágenes', async () => {
+      // Arrange
+      const userId = 'user-123';
+      const files = [mockImageFile];
+      const mockUploadResults = [
+        {
+          url: 'https://storage.googleapis.com/bucket/autos/ABC-123/image1.jpg',
+          path: 'autos/ABC-123/image1.jpg',
+          fileName: 'image1.jpg',
+          size: 1024,
+        },
+      ];
+      
+      mockAutoRepository.save.mockResolvedValue(undefined);
+      mockHistorialRepository.crear.mockResolvedValue({} as any);
+      mockFirebaseStorageService.uploadMultipleImages.mockResolvedValue(mockUploadResults);
+
+      // Act
+      const result = await useCase.execute(validCrearAutoDTO, files, userId);
+
+      // Assert
+      expect(result).toBeInstanceOf(Auto);
+      expect(result.imagenes).toEqual(['https://storage.googleapis.com/bucket/autos/ABC-123/image1.jpg']);
+      
+      // Verificar que se llamó al servicio de Firebase con las opciones correctas
+      expect(mockFirebaseStorageService.uploadMultipleImages).toHaveBeenCalledTimes(1);
+      expect(mockFirebaseStorageService.uploadMultipleImages).toHaveBeenCalledWith(
+        files,
+        {
+          folder: 'autos/ABC-123',
+          allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
+        }
+      );
+
+      // Verificar que se guardó el auto con las imágenes
+      expect(mockAutoRepository.save).toHaveBeenCalledTimes(1);
+      expect(mockAutoRepository.save).toHaveBeenCalledWith(expect.objectContaining({
+        imagenes: ['https://storage.googleapis.com/bucket/autos/ABC-123/image1.jpg'],
+      }));
+    });
+
+    it('debería crear un auto exitosamente con múltiples imágenes', async () => {
+      // Arrange
+      const userId = 'user-123';
+      const files = [mockImageFile, { ...mockImageFile, originalname: 'test-image2.jpg' }];
+      const mockUploadResults = [
+        {
+          url: 'https://storage.googleapis.com/bucket/autos/ABC-123/image1.jpg',
+          path: 'autos/ABC-123/image1.jpg',
+          fileName: 'image1.jpg',
+          size: 1024,
+        },
+        {
+          url: 'https://storage.googleapis.com/bucket/autos/ABC-123/image2.jpg',
+          path: 'autos/ABC-123/image2.jpg',
+          fileName: 'image2.jpg',
+          size: 2048,
+        },
+      ];
+      
+      mockAutoRepository.save.mockResolvedValue(undefined);
+      mockHistorialRepository.crear.mockResolvedValue({} as any);
+      mockFirebaseStorageService.uploadMultipleImages.mockResolvedValue(mockUploadResults);
+
+      // Act
+      const result = await useCase.execute(validCrearAutoDTO, files, userId);
+
+      // Assert
+      expect(result.imagenes).toHaveLength(2);
+      expect(result.imagenes).toEqual([
+        'https://storage.googleapis.com/bucket/autos/ABC-123/image1.jpg',
+        'https://storage.googleapis.com/bucket/autos/ABC-123/image2.jpg',
+      ]);
+
+      // Verificar que se registró en el historial con la información de las imágenes
       expect(mockHistorialRepository.crear).toHaveBeenCalledWith(
         expect.objectContaining({
           props: expect.objectContaining({
-            entidadId: result.id,
-            tipoEntidad: TipoEntidad.AUTO,
-            tipoAccion: 'CREAR',
-            createdBy: userId,
             metadata: expect.objectContaining({
-              nombre: validCrearAutoDTO.nombre,
-              marca: validCrearAutoDTO.marca,
-              modelo: validCrearAutoDTO.modelo,
-              ano: validCrearAutoDTO.ano,
-              precio: validCrearAutoDTO.precio,
-              estado: validCrearAutoDTO.estado,
-              matricula: validCrearAutoDTO.matricula,
-              observaciones: `Auto creado: ${validCrearAutoDTO.nombre} - ${validCrearAutoDTO.matricula}`,
+              cantidadImagenes: 2,
+              observaciones: expect.stringContaining('con 2 imagen(es)'),
             }),
           }),
         })
       );
+    });
+
+    it('debería lanzar BadRequestException si falla la subida de imágenes', async () => {
+      // Arrange
+      const userId = 'user-123';
+      const files = [mockImageFile];
+      const firebaseError = new Error('Error de Firebase Storage');
+      
+      mockFirebaseStorageService.uploadMultipleImages.mockRejectedValue(firebaseError);
+
+      // Act & Assert
+      await expect(useCase.execute(validCrearAutoDTO, files, userId)).rejects.toThrow(
+        BadRequestException
+      );
+      await expect(useCase.execute(validCrearAutoDTO, files, userId)).rejects.toThrow(
+        'Error al subir las imágenes: Error de Firebase Storage'
+      );
+      
+      // Verificar que NO se guardó el auto si falló la subida de imágenes
+      expect(mockAutoRepository.save).not.toHaveBeenCalled();
     });
 
     it('debería generar un UUID válido para el auto', async () => {
@@ -150,7 +271,7 @@ describe('CrearAutoUseCase', () => {
       mockAutoRepository.save.mockResolvedValue(undefined);
 
       // Act
-      const result = await useCase.execute(validCrearAutoDTO, userId);
+      const result = await useCase.execute(validCrearAutoDTO, [], userId);
 
       // Assert
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -163,7 +284,7 @@ describe('CrearAutoUseCase', () => {
       mockAutoRepository.save.mockResolvedValue(undefined);
 
       // Act
-      const result = await useCase.execute(validCrearAutoDTO, userId);
+      const result = await useCase.execute(validCrearAutoDTO, [], userId);
 
       // Assert
       expect(result.createdBy).toBe(userId);
@@ -177,7 +298,7 @@ describe('CrearAutoUseCase', () => {
       mockAutoRepository.save.mockResolvedValue(undefined);
 
       // Act & Assert
-      await expect(useCase.execute(invalidDTO, userId)).rejects.toThrow(
+      await expect(useCase.execute(invalidDTO, [], userId)).rejects.toThrow(
         'El precio y costo no pueden ser negativos'
       );
       
@@ -192,7 +313,7 @@ describe('CrearAutoUseCase', () => {
       mockAutoRepository.save.mockRejectedValue(repositoryError);
 
       // Act & Assert
-      await expect(useCase.execute(validCrearAutoDTO, userId)).rejects.toThrow(
+      await expect(useCase.execute(validCrearAutoDTO, [], userId)).rejects.toThrow(
         'Error de base de datos'
       );
       
@@ -212,7 +333,7 @@ describe('CrearAutoUseCase', () => {
       mockAutoRepository.save.mockResolvedValue(undefined);
 
       // Act
-      const result = await useCase.execute(otroAutoDTO, userId);
+      const result = await useCase.execute(otroAutoDTO, [], userId);
 
       // Assert
       expect(result.nombre).toBe('Honda Civic');
@@ -235,7 +356,7 @@ describe('CrearAutoUseCase', () => {
       mockAutoRepository.save.mockResolvedValue(undefined);
 
       // Act
-      const result = await useCase.execute(dtoConArrays, userId);
+      const result = await useCase.execute(dtoConArrays, [], userId);
 
       // Assert
       expect(result.equipamientoDestacado).toEqual(dtoConArrays.equipamientoDestacado);

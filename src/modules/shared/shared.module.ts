@@ -8,6 +8,7 @@ import { MultiEntityService } from './services/multi-entity.service';
 import { HistorialService } from './services/historial.service';
 import { PaginationService } from './services/pagination.service';
 import { RepositoryFactory } from './factories/repository.factory';
+import { FirebaseStorageProvider } from './factories/firebase-storage.factory';
 import { PrismaHistorialRepository } from './infrastructure/prisma/prisma-historial.repository';
 import { DashboardController } from './controllers/dashboard.controller';
 import { HistorialController } from './controllers/historial.controller';
@@ -20,7 +21,7 @@ import { HealthController } from './controllers/health.controller';
     AllExceptionsFilter, 
     PasswordService, 
     FirebaseService,
-    FirebaseStorageService,
+    FirebaseStorageProvider, // 🧪 Usa mock en tests, real en producción
     MultiEntityService,
     HistorialService,
     PaginationService,

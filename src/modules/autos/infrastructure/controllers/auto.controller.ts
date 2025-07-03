@@ -67,11 +67,29 @@ export class AutoController {
   @Post()
   @UseGuards(RolesGuard)
   @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR)
+  @UseInterceptors(FilesInterceptor('imagenes', 10, {
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB límite máximo absoluto (seguridad)
+    },
+    fileFilter: (req, file, callback) => {
+      // Validar tipos de archivo permitidos
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.mimetype)) {
+        return callback(
+          new BadRequestException('Solo se permiten archivos de imagen (JPEG, PNG, WebP)'),
+          false
+        );
+      }
+      callback(null, true);
+    },
+  }))
   async create(
     @Body() body: CrearAutoDTO,
+    @UploadedFiles() files: Express.Multer.File[],
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<AutoResponseDTO> {
-    return AutoMapper.toHttp(await this.crearAutoUseCase.execute(body, user.id));
+    this.logger.log(`Creando auto con ${files?.length || 0} imágenes`);
+    return AutoMapper.toHttp(await this.crearAutoUseCase.execute(body, files, user.id));
   }
 
   @Put(':id')

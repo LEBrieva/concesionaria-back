@@ -5,7 +5,6 @@ import {
   IsInt,
   Min,
   IsArray,
-  ArrayNotEmpty,
   IsEnum,
   Max,
   Length,
@@ -64,10 +63,6 @@ export class CrearAutoDTO {
     message: 'El estado inicial debe ser POR_INGRESAR o DISPONIBLE',
   })
   estado: EstadoAuto.POR_INGRESAR | EstadoAuto.DISPONIBLE;
-
-  @IsArray()
-  @ArrayNotEmpty()
-  imagenes: string[];
 
   @IsArray()
   equipamientoDestacado: string[];
