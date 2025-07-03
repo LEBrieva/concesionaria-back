@@ -5,7 +5,7 @@ import { CrearAutoDTO } from '../../dtos/autos/crear/crear-auto.dto';
 import { Marca, EstadoAuto, Transmision, Color } from '../../../domain/auto.enum';
 import { Auto } from '../../../domain/auto.entity';
 import { HistorialService } from '../../../../shared/services/historial.service';
-import { IHistorialRepository } from '../../../../shared/interfaces/historial-repository.interface';
+import { IHistorialRepository } from '../../../../shared/interfaces/historial';
 import { TipoEntidad } from '../../../../shared/entities/historial.entity';
 
 describe('CrearAutoUseCase', () => {

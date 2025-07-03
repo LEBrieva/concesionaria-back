@@ -1,5 +1,5 @@
-import { Historial, TipoEntidad, TipoAccion } from '../entities/historial.entity';
-import { IBaseRepository } from './base-repository.interface';
+import { Historial, TipoAccion, TipoEntidad } from "@shared/entities/historial.entity";
+import { IBaseRepository } from "../base";
 
 export interface IHistorialRepository extends IBaseRepository<Historial> {
   crear(historial: Historial): Promise<Historial>;
@@ -14,4 +14,4 @@ export interface IHistorialRepository extends IBaseRepository<Historial> {
     tipoEntidad: TipoEntidad,
     limite?: number
   ): Promise<Historial[]>;
-} 
+}   

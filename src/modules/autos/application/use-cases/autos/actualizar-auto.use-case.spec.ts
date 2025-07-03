@@ -7,7 +7,7 @@ import { Auto } from '../../../domain/auto.entity';
 import { Marca, EstadoAuto, Transmision, Color } from '../../../domain/auto.enum';
 import { AutoProps } from '../../../domain/interfaces/auto.interfaces';
 import { HistorialService } from '../../../../shared/services/historial.service';
-import { IHistorialRepository } from '../../../../shared/interfaces/historial-repository.interface';
+import { IHistorialRepository } from '../../../../shared/interfaces/historial';
 import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
 
 describe('ActualizarAutoUseCase', () => {

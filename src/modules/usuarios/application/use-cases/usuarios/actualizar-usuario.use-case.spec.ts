@@ -8,7 +8,7 @@ import { Usuario } from '../../../domain/usuario.entity';
 import { RolUsuario } from '../../../domain/usuario.enum';
 import { UsuarioProps } from '../../../domain/usuario.interfaces';
 import { HistorialService } from '../../../../shared/services/historial.service';
-import { IHistorialRepository } from '../../../../shared/interfaces/historial-repository.interface';
+import { IHistorialRepository } from '../../../../shared/interfaces/historial';
 import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
 
 describe('ActualizarUsuarioUseCase', () => {

@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Historial, TipoAccion, TipoEntidad } from '../entities/historial.entity';
-import { IHistorialRepository } from '../interfaces/historial-repository.interface';
+import { IHistorialRepository } from '../interfaces';
 
 export interface CambioEstadoData {
   entidadId: string;

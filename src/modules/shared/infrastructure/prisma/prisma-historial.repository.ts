@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { Historial, TipoEntidad, TipoAccion } from '../../entities/historial.entity';
-import { IHistorialRepository } from '../../interfaces/historial-repository.interface';
+import { IHistorialRepository } from '../../interfaces';
 import { BaseRepository } from '../../repositories/base.repository';
 import { Historial as PrismaHistorial } from '@prisma/client';
 

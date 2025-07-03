@@ -8,7 +8,7 @@ import { RolUsuario } from '../../../domain/usuario.enum';
 import { Usuario } from '../../../domain/usuario.entity';
 import { AuthenticatedUser } from '../../../../auth/domain/interfaces/authenticated-user.interface';
 import { HistorialService } from '../../../../shared/services/historial.service';
-import { IHistorialRepository } from '../../../../shared/interfaces/historial-repository.interface';
+import { IHistorialRepository } from '../../../../shared/interfaces/historial';
 import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
 
 describe('CrearUsuarioUseCase', () => {

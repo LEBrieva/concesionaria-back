@@ -1,10 +1,12 @@
-import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { IAutoRepository } from '@autos/domain/auto.repository';
 import { HistorialService } from '../../../../shared/services/historial.service';
-import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
+import { TipoEntidad } from '../../../../shared/entities/historial.entity';
 
 @Injectable()
 export class EliminarAutoUseCase {
+  private readonly logger = new Logger(EliminarAutoUseCase.name);
+
   constructor(
     @Inject('IAutoRepository')
     private readonly autoRepository: IAutoRepository,

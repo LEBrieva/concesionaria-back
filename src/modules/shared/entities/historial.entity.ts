@@ -1,5 +1,5 @@
 import { BaseEntity } from './base.entity';
-import { HistorialProps } from '../interfaces/historial-props.interface';
+import { HistorialProps } from '../interfaces';
 
 export enum TipoAccion {
   CREAR = 'CREAR',
