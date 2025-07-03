@@ -3,7 +3,7 @@ import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { CambiarEstadoAutoUseCase } from './cambiar-estado-auto.use-case';
 import { IAutoRepository } from '../../../domain/auto.repository';
 import { HistorialService } from '../../../../shared/services/historial.service';
-import { IHistorialRepository } from '../../../../shared/interfaces/historial-repository.interface';
+import { IHistorialRepository } from '../../../../shared/interfaces/historial';
 import { Auto } from '../../../domain/auto.entity';
 import { EstadoAuto, Marca, Color, Transmision } from '../../../domain/auto.enum';
 import { TipoEntidad } from '../../../../shared/entities/historial.entity';
