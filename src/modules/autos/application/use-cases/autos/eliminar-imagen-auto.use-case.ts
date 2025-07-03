@@ -1,6 +1,8 @@
 import { Injectable, Inject, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { FirebaseStorageService } from '../../../../shared/services/firebase-storage.service';
 import { IAutoRepository } from '../../../domain/auto.repository';
+import { HistorialService } from '../../../../shared/services/historial.service';
+import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
 
 @Injectable()
 export class EliminarImagenAutoUseCase {
@@ -9,9 +11,10 @@ export class EliminarImagenAutoUseCase {
   constructor(
     private readonly firebaseStorageService: FirebaseStorageService,
     @Inject('IAutoRepository') private readonly autoRepository: IAutoRepository,
+    private readonly historialService: HistorialService,
   ) {}
 
-  async execute(autoId: string, fileName: string): Promise<{ mensaje: string }> {
+  async execute(autoId: string, fileName: string, usuarioId: string): Promise<{ mensaje: string }> {
     try {
       // 1. Verificar que el auto existe
       const auto = await this.autoRepository.findOneById(autoId);
@@ -44,6 +47,29 @@ export class EliminarImagenAutoUseCase {
 
       await this.autoRepository.update(autoId, autoActualizado);
 
+      // 6. Registrar en historial - UN SOLO REGISTRO por operación
+      await this.historialService.registrarCambio({
+        entidadId: autoId,
+        tipoEntidad: TipoEntidad.AUTO,
+        tipoAccion: TipoAccion.ACTUALIZAR,
+        campoAfectado: 'imagenes',
+        valorAnterior: `${imagenesActuales.length} imagen(es)`,
+        valorNuevo: `${imagenesActualizadas.length} imagen(es)`,
+        observaciones: `Se eliminó 1 imagen del auto: ${auto.nombre} - ${auto.matricula}`,
+        usuarioId,
+        metadata: {
+          autoNombre: auto.nombre,
+          autoMatricula: auto.matricula,
+          autoMarca: auto.marca,
+          autoModelo: auto.modelo,
+          tipoOperacion: 'ELIMINAR_IMAGEN',
+          cantidadImagenesAnterior: imagenesActuales.length,
+          cantidadImagenesNueva: imagenesActualizadas.length,
+          archivoEliminado: fileName,
+          urlEliminada: urlAEliminar,
+        },
+      });
+
       this.logger.log(`Imagen eliminada exitosamente del auto ${autoId}`);
 
       return {
@@ -64,14 +90,15 @@ export class EliminarImagenAutoUseCase {
   /**
    * Elimina todas las imágenes de un auto (útil cuando se elimina el auto)
    */
-  async eliminarTodasLasImagenes(autoId: string): Promise<void> {
+  async eliminarTodasLasImagenes(autoId: string, usuarioId?: string): Promise<void> {
     try {
       const auto = await this.autoRepository.findOneById(autoId);
       if (!auto || !auto.imagenes || auto.imagenes.length === 0) {
         return;
       }
 
-      this.logger.log(`Eliminando ${auto.imagenes.length} imágenes del auto ${autoId}`);
+      const cantidadImagenesAnterior = auto.imagenes.length;
+      this.logger.log(`Eliminando ${cantidadImagenesAnterior} imágenes del auto ${autoId}`);
 
       // Extraer paths de las URLs
       const filePaths = auto.imagenes.map(url => {
@@ -94,6 +121,30 @@ export class EliminarImagenAutoUseCase {
       });
 
       await this.autoRepository.update(autoId, autoActualizado);
+
+      // Registrar en historial solo si hay usuarioId (operación manual)
+      if (usuarioId) {
+        await this.historialService.registrarCambio({
+          entidadId: autoId,
+          tipoEntidad: TipoEntidad.AUTO,
+          tipoAccion: TipoAccion.ACTUALIZAR,
+          campoAfectado: 'imagenes',
+          valorAnterior: `${cantidadImagenesAnterior} imagen(es)`,
+          valorNuevo: '0 imagen(es)',
+          observaciones: `Se eliminaron todas las imágenes del auto: ${auto.nombre} - ${auto.matricula}`,
+          usuarioId,
+          metadata: {
+            autoNombre: auto.nombre,
+            autoMatricula: auto.matricula,
+            autoMarca: auto.marca,
+            autoModelo: auto.modelo,
+            tipoOperacion: 'ELIMINAR_TODAS_IMAGENES',
+            cantidadImagenesEliminadas: cantidadImagenesAnterior,
+            cantidadImagenesAnterior,
+            cantidadImagenesNueva: 0,
+          },
+        });
+      }
 
       this.logger.log(`Todas las imágenes eliminadas del auto ${autoId}`);
 

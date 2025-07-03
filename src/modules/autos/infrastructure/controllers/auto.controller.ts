@@ -260,11 +260,12 @@ export class AutoController {
   async subirImagenes(
     @Param('id', ParseUUIDPipe) autoId: string,
     @UploadedFiles() files: Express.Multer.File[],
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<SubirImagenesResponseDto> {
     this.logger.log(`Recibidas ${files?.length || 0} imágenes para auto ${autoId}`);
     
     // El exception filter maneja automáticamente cualquier error
-    return await this.subirImagenesUseCase.execute(autoId, files);
+    return await this.subirImagenesUseCase.execute(autoId, files, user.id);
   }
 
   /**
@@ -276,9 +277,10 @@ export class AutoController {
   @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR)
   async eliminarImagen(
     @Param('id', ParseUUIDPipe) autoId: string,
-    @Body() dto: EliminarImagenDto
+    @Body() dto: EliminarImagenDto,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<{ mensaje: string }> {
     // El exception filter maneja automáticamente cualquier error
-    return await this.eliminarImagenUseCase.execute(autoId, dto.fileName);
+    return await this.eliminarImagenUseCase.execute(autoId, dto.fileName, user.id);
   }
 }

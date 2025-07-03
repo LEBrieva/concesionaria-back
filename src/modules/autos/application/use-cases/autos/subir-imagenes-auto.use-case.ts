@@ -3,6 +3,8 @@ import { FirebaseStorageService } from '../../../../shared/services/firebase-sto
 import { ImageUploadResult } from '../../../../shared/interfaces';
 import { IAutoRepository } from '../../../domain/auto.repository';
 import { SubirImagenesResponseDto, ImagenSubidaResponseDto } from '../../dtos/autos/imagenes/imagenes-response.dto';
+import { HistorialService } from '../../../../shared/services/historial.service';
+import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
 
 @Injectable()
 export class SubirImagenesAutoUseCase {
@@ -11,11 +13,13 @@ export class SubirImagenesAutoUseCase {
   constructor(
     private readonly firebaseStorageService: FirebaseStorageService,
     @Inject('IAutoRepository') private readonly autoRepository: IAutoRepository,
+    private readonly historialService: HistorialService,
   ) {}
 
   async execute(
     autoId: string,
-    files: Express.Multer.File[]
+    files: Express.Multer.File[],
+    usuarioId: string
   ): Promise<SubirImagenesResponseDto> {
     // 1. Validar que existan archivos
     if (!files || files.length === 0) {
@@ -35,7 +39,10 @@ export class SubirImagenesAutoUseCase {
 
     this.logger.log(`Subiendo ${files.length} imágenes para auto ${autoId}`);
 
-    // 3. Configurar opciones de subida con estructura basada en matrícula
+    // 3. Obtener imágenes existentes antes de la subida
+    const imagenesAnteriores = auto.imagenes || [];
+
+    // 4. Configurar opciones de subida con estructura basada en matrícula
     const folderPath = `autos/${auto.matricula}`;
     const uploadOptions = {
       folder: folderPath,
@@ -43,21 +50,45 @@ export class SubirImagenesAutoUseCase {
       allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
     };
 
-    // 4. Subir imágenes a Firebase Storage
+    // 5. Subir imágenes a Firebase Storage
     const uploadResults: ImageUploadResult[] = await this.firebaseStorageService.uploadMultipleImages(
       files,
       uploadOptions
     );
 
-    // 5. Preparar respuesta (solo datos útiles para el frontend)
+    // 6. Preparar respuesta (solo datos útiles para el frontend)
     const imagenesResponse: ImagenSubidaResponseDto[] = uploadResults.map(result => ({
       url: result.url,
       fileName: result.fileName,
     }));
 
-    // 6. Actualizar el auto con las URLs de las imágenes (opcional)
-    // Nota: Esto depende de cómo quieras almacenar las URLs en la BD
+    // 7. Actualizar el auto con las URLs de las imágenes
     await this.actualizarImagenesEnAuto(autoId, uploadResults);
+
+    // 8. Registrar en historial - UN SOLO REGISTRO por operación
+    const nuevasImagenes = uploadResults.map(result => result.url);
+    await this.historialService.registrarCambio({
+      entidadId: autoId,
+      tipoEntidad: TipoEntidad.AUTO,
+      tipoAccion: TipoAccion.ACTUALIZAR,
+      campoAfectado: 'imagenes',
+      valorAnterior: `${imagenesAnteriores.length} imagen(es)`,
+      valorNuevo: `${imagenesAnteriores.length + nuevasImagenes.length} imagen(es)`,
+      observaciones: `Se subieron ${nuevasImagenes.length} imagen(es) al auto: ${auto.nombre} - ${auto.matricula}`,
+      usuarioId,
+      metadata: {
+        autoNombre: auto.nombre,
+        autoMatricula: auto.matricula,
+        autoMarca: auto.marca,
+        autoModelo: auto.modelo,
+        tipoOperacion: 'SUBIR_IMAGENES',
+        cantidadImagenesSubidas: nuevasImagenes.length,
+        cantidadImagenesAnterior: imagenesAnteriores.length,
+        cantidadImagenesNueva: imagenesAnteriores.length + nuevasImagenes.length,
+        nombresArchivos: uploadResults.map(r => r.fileName),
+        urlsSubidas: nuevasImagenes,
+      },
+    });
 
     const response: SubirImagenesResponseDto = {
       imagenes: imagenesResponse,
