@@ -39,10 +39,8 @@ import { GestionarFavoritoDto } from '../../application/dtos/autos/favoritos/ges
 import { AutoPaginationDto } from '../../application/dtos/autos/pagination/auto-pagination.dto';
 import { MarcasDisponiblesResponseDto } from '../../application/dtos/autos/marcas/marcas-disponibles.dto';
 import { PaginatedResponseDto, BasePaginationDto } from '../../../shared/dtos/pagination.dto';
-import { SubirImagenesAutoUseCase } from '../../application/use-cases/autos/subir-imagenes-auto.use-case';
 import { EliminarImagenAutoUseCase } from '../../application/use-cases/autos/eliminar-imagen-auto.use-case';
 import { 
-  SubirImagenesResponseDto, 
   EliminarImagenDto 
 } from '../../application/dtos/autos/imagenes/imagenes-response.dto';
 
@@ -60,7 +58,6 @@ export class AutoController {
     private readonly gestionarFavoritoUseCase: GestionarFavoritoUseCase,
     private readonly obtenerFavoritosUseCase: ObtenerFavoritosUseCase,
     private readonly autoQueryService: AutoQueryService,
-    private readonly subirImagenesUseCase: SubirImagenesAutoUseCase,
     private readonly eliminarImagenUseCase: EliminarImagenAutoUseCase,
   ) {}
 
@@ -95,13 +92,41 @@ export class AutoController {
   @Put(':id')
   @UseGuards(RolesGuard)
   @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR)
+  @UseInterceptors(FilesInterceptor('imagenes', 10, {
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB límite máximo absoluto (seguridad)
+    },
+    fileFilter: (req, file, callback) => {
+      // Validar tipos de archivo permitidos
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.mimetype)) {
+        return callback(
+          new BadRequestException('Solo se permiten archivos de imagen (JPEG, PNG, WebP)'),
+          false
+        );
+      }
+      callback(null, true);
+    },
+  }))
   async update(
     @Param('id') id: string,
     @Body() body: ActualizarAutoDTO,
+    @UploadedFiles() files: Express.Multer.File[],
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<AutoResponseDTO> {
+    this.logger.log(`Actualizando auto ${id} con ${files?.length || 0} imágenes nuevas`);
+    
+    // Transformar el campo imagenes si viene como string (FormData)
+    if (body.imagenes && typeof body.imagenes === 'string') {
+      try {
+        body.imagenes = JSON.parse(body.imagenes as string);
+      } catch {
+        body.imagenes = [];
+      }
+    }
+    
     return AutoMapper.toHttp(
-      await this.actualizarAutoUseCase.execute(id, body, user.id),
+      await this.actualizarAutoUseCase.execute(id, body, files, user.id),
     );
   }
 
@@ -251,40 +276,6 @@ export class AutoController {
   }
 
   // 📸 ENDPOINTS DE IMÁGENES
-
-  /**
-   * Subir imágenes para un auto específico
-   * Las imágenes se organizan automáticamente en carpetas por matrícula
-   */
-  @Post(':id/imagenes')
-  @UseGuards(RolesGuard)
-  @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR)
-  @UseInterceptors(FilesInterceptor('imagenes', 10, {
-    limits: {
-      fileSize: 10 * 1024 * 1024, // 10MB límite máximo absoluto (seguridad)
-    },
-    fileFilter: (req, file, callback) => {
-      // Validar tipos de archivo permitidos
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-      if (!allowedTypes.includes(file.mimetype)) {
-        return callback(
-          new BadRequestException('Solo se permiten archivos de imagen (JPEG, PNG, WebP)'),
-          false
-        );
-      }
-      callback(null, true);
-    },
-  }))
-  async subirImagenes(
-    @Param('id', ParseUUIDPipe) autoId: string,
-    @UploadedFiles() files: Express.Multer.File[],
-    @CurrentUser() user: AuthenticatedUser,
-  ): Promise<SubirImagenesResponseDto> {
-    this.logger.log(`Recibidas ${files?.length || 0} imágenes para auto ${autoId}`);
-    
-    // El exception filter maneja automáticamente cualquier error
-    return await this.subirImagenesUseCase.execute(autoId, files, user.id);
-  }
 
   /**
    * Eliminar una imagen específica de un auto

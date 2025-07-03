@@ -31,6 +31,25 @@ describe('Gestión de Imágenes E2E', () => {
   // Helper para evitar rate limiting
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+  // Función auxiliar para hacer peticiones PUT con imágenes
+  const putAutoWithImages = (
+    autoId: string,
+    token: string,
+    files: { buffer: Buffer; filename: string }[],
+    imagenesExistentes: string[] = []
+  ) => {
+    let req = request(app.getHttpServer())
+      .put(`/autos/${autoId}`)
+      .set('Authorization', `Bearer ${token}`)
+      .field('imagenes', JSON.stringify(imagenesExistentes));
+
+    files.forEach(file => {
+      req = req.attach('imagenes', file.buffer, file.filename);
+    });
+
+    return req;
+  };
+
   // Helper para crear archivos de prueba en memoria
   const createTestImageBuffer = (type: 'jpeg' | 'png' | 'webp' | 'invalid' = 'jpeg'): Buffer => {
     // Firmas de archivos reales para validación
@@ -182,180 +201,32 @@ describe('Gestión de Imágenes E2E', () => {
     await delay(500);
   }
 
-  describe('🔗 Subida de Imágenes (POST /autos/:id/imagenes)', () => {
-    it('ADMIN debe subir imagen JPEG válida (flujo completo exitoso)', async () => {
-      await delay(1000);
-      
-      const imageBuffer = createTestImageBuffer('jpeg');
-      
-      const response = await request(app.getHttpServer())
-        .post(`/autos/${autoId}/imagenes`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .attach('imagenes', imageBuffer, 'test-image.jpg');
 
-      // Debug: mostrar respuesta si falla
-      if (response.status !== 201) {
-        console.log('Error response:', response.status, response.body);
-      }
-      
-      expect(response.status).toBe(201);
 
-      // Verificar estructura de respuesta
-      expect(response.body.imagenes).toBeDefined();
-      expect(response.body.total).toBe(1);
-      expect(response.body.mensaje).toContain('1 imagen(es) subida(s) exitosamente');
-      
-      // Verificar datos de la imagen
-      const imagen = response.body.imagenes[0];
-      expect(imagen.url).toBeDefined();
-      expect(imagen.url).toContain('storage.googleapis.com');
-      expect(imagen.fileName).toBeDefined();
-      expect(imagen.fileName).toMatch(/\.jpg$/);
-    });
 
-    it('VENDEDOR debe subir múltiples imágenes PNG (autorización correcta)', async () => {
-      await delay(1000);
-      
-      const imageBuffer1 = createTestImageBuffer('png');
-      const imageBuffer2 = createTestImageBuffer('png');
-      
-      const response = await request(app.getHttpServer())
-        .post(`/autos/${autoId}/imagenes`)
-        .set('Authorization', `Bearer ${vendedorToken}`)
-        .attach('imagenes', imageBuffer1, 'test-1.png')
-        .attach('imagenes', imageBuffer2, 'test-2.png')
-        .expect(201);
 
-      expect(response.body.total).toBe(2);
-      expect(response.body.imagenes).toHaveLength(2);
-      expect(response.body.mensaje).toContain('2 imagen(es) subida(s) exitosamente');
-      
-      // Verificar ambas imágenes
-      response.body.imagenes.forEach(imagen => {
-        expect(imagen.url).toContain('storage.googleapis.com');
-        expect(imagen.fileName).toMatch(/\.png$/);
-      });
-    });
 
-    it('debe subir imagen WebP válida (soporte de formato moderno)', async () => {
-      await delay(1000);
-      
-      const imageBuffer = createTestImageBuffer('webp');
-      
-      const response = await request(app.getHttpServer())
-        .post(`/autos/${autoId}/imagenes`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .attach('imagenes', imageBuffer, 'modern-image.webp')
-        .expect(201);
-
-      expect(response.body.total).toBe(1);
-      expect(response.body.imagenes[0].fileName).toMatch(/\.webp$/);
-    });
-  });
-
-  describe('🔒 Seguridad y Autorización', () => {
-    it('debe rechazar CLIENTE sin permisos (seguridad crítica)', async () => {
-      await delay(1000);
-      
-      const imageBuffer = createTestImageBuffer('jpeg');
-      
-      await request(app.getHttpServer())
-        .post(`/autos/${autoId}/imagenes`)
-        .set('Authorization', `Bearer ${clienteToken}`)
-        .attach('imagenes', imageBuffer, 'unauthorized.jpg')
-        .expect(403);
-    });
-
-    it('debe rechazar request sin autenticación (seguridad básica)', async () => {
-      await delay(1000);
-      
-      const imageBuffer = createTestImageBuffer('jpeg');
-      
-      await request(app.getHttpServer())
-        .post(`/autos/${autoId}/imagenes`)
-        .attach('imagenes', imageBuffer, 'no-auth.jpg')
-        .expect(401);
-    });
-
-    it('debe rechazar token JWT inválido', async () => {
-      await delay(1000);
-      
-      const imageBuffer = createTestImageBuffer('jpeg');
-      
-      await request(app.getHttpServer())
-        .post(`/autos/${autoId}/imagenes`)
-        .set('Authorization', 'Bearer token-invalido')
-        .attach('imagenes', imageBuffer, 'invalid-token.jpg')
-        .expect(401);
-    });
-  });
-
-  describe('🛡️ Validaciones de Archivos', () => {
-    it('debe rechazar archivo con firma inválida (seguridad)', async () => {
-      await delay(1000);
-      
-      const invalidBuffer = createTestImageBuffer('invalid');
-      
-      await request(app.getHttpServer())
-        .post(`/autos/${autoId}/imagenes`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .attach('imagenes', invalidBuffer, 'malicious.jpg')
-        .expect(400);
-    });
-
-    it('debe rechazar más de 10 imágenes (límite de archivos)', async () => {
-      await delay(1000);
-      
-      const req = request(app.getHttpServer())
-        .post(`/autos/${autoId}/imagenes`)
-        .set('Authorization', `Bearer ${adminToken}`);
-
-      // Intentar subir 11 imágenes
-      for (let i = 0; i < 11; i++) {
-        const imageBuffer = createTestImageBuffer('jpeg');
-        req.attach('imagenes', imageBuffer, `overflow-${i}.jpg`);
-      }
-
-      await req.expect(400);
-    });
-
-    it('debe rechazar request sin archivos', async () => {
-      await delay(1000);
-      
-      await request(app.getHttpServer())
-        .post(`/autos/${autoId}/imagenes`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .expect(400);
-    });
-
-    it('debe rechazar auto inexistente (validación de entidad)', async () => {
-      await delay(1000);
-      
-      const imageBuffer = createTestImageBuffer('jpeg');
-      const fakeAutoId = '123e4567-e89b-12d3-a456-426614174000';
-      
-      await request(app.getHttpServer())
-        .post(`/autos/${fakeAutoId}/imagenes`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .attach('imagenes', imageBuffer, 'no-auto.jpg')
-        .expect(404);
-    });
-  });
 
   describe('🗑️ Eliminación de Imágenes (DELETE /autos/:id/imagenes)', () => {
     let imageFileName: string;
 
     beforeEach(async () => {
-      // Subir una imagen para luego eliminarla
+      // Subir una imagen usando PUT para luego eliminarla
       await delay(1000);
       
       const imageBuffer = createTestImageBuffer('jpeg');
-      const uploadResponse = await request(app.getHttpServer())
-        .post(`/autos/${autoId}/imagenes`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .attach('imagenes', imageBuffer, 'to-delete.jpg');
+      
+      const uploadResponse = await putAutoWithImages(
+        autoId,
+        adminToken,
+        [{ buffer: imageBuffer, filename: 'to-delete.jpg' }],
+        [] // Sin imágenes existentes
+      );
 
-      imageFileName = uploadResponse.body.imagenes[0].fileName;
+      // Extraer el nombre del archivo de la URL completa
+      const imageUrl = uploadResponse.body.imagenes[0];
+      const urlParts = imageUrl.split('/');
+      imageFileName = urlParts[urlParts.length - 1]; // Último segmento de la URL
       await delay(500);
     });
 
@@ -374,14 +245,19 @@ describe('Gestión de Imágenes E2E', () => {
     it('VENDEDOR debe eliminar imagen (autorización correcta)', async () => {
       await delay(1000);
       
-      // Subir otra imagen para el vendedor
+      // Subir otra imagen para el vendedor usando PUT
       const imageBuffer = createTestImageBuffer('jpeg');
-      const uploadResponse = await request(app.getHttpServer())
-        .post(`/autos/${autoId}/imagenes`)
-        .set('Authorization', `Bearer ${vendedorToken}`)
-        .attach('imagenes', imageBuffer, 'vendedor-delete.jpg');
+      const uploadResponse = await putAutoWithImages(
+        autoId,
+        vendedorToken,
+        [{ buffer: imageBuffer, filename: 'vendedor-delete.jpg' }],
+        [] // Sin imágenes existentes
+      );
 
-      const fileName = uploadResponse.body.imagenes[0].fileName;
+      // Extraer el nombre del archivo de la URL completa
+      const imageUrl = uploadResponse.body.imagenes[0];
+      const urlParts = imageUrl.split('/');
+      const fileName = urlParts[urlParts.length - 1]; // Último segmento de la URL
       await delay(500);
 
       const response = await request(app.getHttpServer())
@@ -428,15 +304,19 @@ describe('Gestión de Imágenes E2E', () => {
     it('debe completar ciclo completo: subir → verificar → eliminar', async () => {
       await delay(2000);
       
-      // 1. Subir imagen
+      // 1. Subir imagen usando PUT
       const imageBuffer = createTestImageBuffer('png');
-      const uploadResponse = await request(app.getHttpServer())
-        .post(`/autos/${autoId}/imagenes`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .attach('imagenes', imageBuffer, 'full-cycle.png')
-        .expect(201);
+      const uploadResponse = await putAutoWithImages(
+        autoId,
+        adminToken,
+        [{ buffer: imageBuffer, filename: 'full-cycle.png' }],
+        [] // Sin imágenes existentes
+      ).expect(200);
 
-      const fileName = uploadResponse.body.imagenes[0].fileName;
+      // Extraer el nombre del archivo de la URL completa
+      const imageUrl = uploadResponse.body.imagenes[0];
+      const urlParts = imageUrl.split('/');
+      const fileName = urlParts[urlParts.length - 1]; // Último segmento de la URL
       expect(fileName).toBeDefined();
       await delay(1000);
 
@@ -446,7 +326,7 @@ describe('Gestión de Imágenes E2E', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      expect(autoResponse.body.imagenes).toContain(uploadResponse.body.imagenes[0].url);
+      expect(autoResponse.body.imagenes).toContain(uploadResponse.body.imagenes[0]);
       await delay(1000);
 
       // 3. Eliminar imagen
@@ -465,31 +345,38 @@ describe('Gestión de Imágenes E2E', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      expect(autoUpdatedResponse.body.imagenes).not.toContain(uploadResponse.body.imagenes[0].url);
+      expect(autoUpdatedResponse.body.imagenes).not.toContain(uploadResponse.body.imagenes[0]);
     });
 
-    it('debe manejar múltiples operaciones concurrentes', async () => {
+    it('debe manejar múltiples operaciones secuenciales', async () => {
       await delay(2000);
       
       const imageBuffer1 = createTestImageBuffer('jpeg');
       const imageBuffer2 = createTestImageBuffer('png');
       
-      // Subir dos imágenes simultáneamente
-      const [response1, response2] = await Promise.all([
-        request(app.getHttpServer())
-          .post(`/autos/${autoId}/imagenes`)
-          .set('Authorization', `Bearer ${adminToken}`)
-          .attach('imagenes', imageBuffer1, 'concurrent-1.jpg'),
-        request(app.getHttpServer())
-          .post(`/autos/${autoId}/imagenes`)
-          .set('Authorization', `Bearer ${vendedorToken}`)
-          .attach('imagenes', imageBuffer2, 'concurrent-2.png')
-      ]);
+      // Subir primera imagen
+      const response1 = await putAutoWithImages(
+        autoId,
+        adminToken,
+        [{ buffer: imageBuffer1, filename: 'sequential-1.jpg' }],
+        [] // Sin imágenes existentes
+      );
 
-      expect(response1.status).toBe(201);
-      expect(response2.status).toBe(201);
-      expect(response1.body.total).toBe(1);
-      expect(response2.body.total).toBe(1);
+      expect(response1.status).toBe(200);
+      expect(response1.body.imagenes).toHaveLength(1);
+      
+      await delay(1000);
+      
+      // Subir segunda imagen manteniendo la primera
+      const response2 = await putAutoWithImages(
+        autoId,
+        vendedorToken,
+        [{ buffer: imageBuffer2, filename: 'sequential-2.png' }],
+        response1.body.imagenes // Mantener imágenes existentes
+      );
+
+      expect(response2.status).toBe(200);
+      expect(response2.body.imagenes).toHaveLength(2); // Ahora debe tener 2 imágenes
     });
   });
 });

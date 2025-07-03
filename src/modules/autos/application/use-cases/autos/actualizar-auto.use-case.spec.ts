@@ -9,11 +9,13 @@ import { AutoProps } from '../../../domain/interfaces/auto.interfaces';
 import { HistorialService } from '../../../../shared/services/historial.service';
 import { IHistorialRepository } from '../../../../shared/interfaces/historial';
 import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
+import { FirebaseStorageService } from '../../../../shared/services/firebase-storage.service';
 
 describe('ActualizarAutoUseCase', () => {
   let useCase: ActualizarAutoUseCase;
   let mockAutoRepository: jest.Mocked<IAutoRepository>;
   let mockHistorialRepository: jest.Mocked<IHistorialRepository>;
+  let mockFirebaseStorageService: jest.Mocked<FirebaseStorageService>;
   let historialService: HistorialService;
 
   const existingAutoProps: AutoProps = {
@@ -83,6 +85,13 @@ describe('ActualizarAutoUseCase', () => {
       findWithPagination: jest.fn(),
     };
 
+    mockFirebaseStorageService = {
+      uploadMultipleImages: jest.fn(),
+      deleteMultipleImages: jest.fn(),
+      deleteImage: jest.fn(),
+      getPublicUrl: jest.fn(),
+    } as any;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ActualizarAutoUseCase,
@@ -94,6 +103,10 @@ describe('ActualizarAutoUseCase', () => {
         {
           provide: 'IHistorialRepository',
           useValue: mockHistorialRepository,
+        },
+        {
+          provide: FirebaseStorageService,
+          useValue: mockFirebaseStorageService,
         },
       ],
     }).compile();
@@ -107,6 +120,75 @@ describe('ActualizarAutoUseCase', () => {
   });
 
   describe('execute', () => {
+    it('debería actualizar un auto exitosamente con imágenes inteligentes', async () => {
+      // Arrange
+      const autoId = '123e4567-e89b-12d3-a456-426614174000';
+      const userId = 'user-updater';
+      const existingAuto = new Auto({
+        ...existingAutoProps,
+        imagenes: [
+          'https://storage.googleapis.com/bucket.appspot.com/autos/ABC-123/image1.jpg', 
+          'https://storage.googleapis.com/bucket.appspot.com/autos/ABC-123/image2.jpg'
+        ]
+      });
+      const mockHistorial = { id: 'historial-123', createdAt: new Date() };
+
+      // DTO con imágenes a mantener
+      const dtoConImagenes: ActualizarAutoDTO = {
+        precio: 22000,
+        imagenes: ['https://storage.googleapis.com/bucket.appspot.com/autos/ABC-123/image1.jpg'] // Solo mantener la primera imagen
+      };
+
+      // Archivos nuevos
+      const nuevosArchivos = [
+        { originalname: 'nueva-imagen.jpg', buffer: Buffer.from('fake-image') } as Express.Multer.File
+      ];
+
+      // Mocks
+      mockAutoRepository.findOneById.mockResolvedValue(existingAuto);
+      mockAutoRepository.update.mockResolvedValue(undefined);
+      mockHistorialRepository.crear.mockResolvedValue(mockHistorial as any);
+      mockFirebaseStorageService.deleteMultipleImages.mockResolvedValue(undefined);
+      mockFirebaseStorageService.uploadMultipleImages.mockResolvedValue([
+        { url: 'https://storage.googleapis.com/bucket.appspot.com/autos/ABC-123/nueva-imagen.jpg', fileName: 'nueva-imagen.jpg', path: 'autos/ABC-123/nueva-imagen.jpg', size: 1024 }
+      ]);
+
+      // Act
+      const result = await useCase.execute(autoId, dtoConImagenes, nuevosArchivos, userId);
+
+      // Assert
+      expect(result).toBeInstanceOf(Auto);
+      expect(result.imagenes).toEqual([
+        'https://storage.googleapis.com/bucket.appspot.com/autos/ABC-123/image1.jpg', // Mantenida
+        'https://storage.googleapis.com/bucket.appspot.com/autos/ABC-123/nueva-imagen.jpg' // Nueva
+      ]);
+      expect(result.precio).toBe(22000);
+
+      // Verificar que se eliminó la imagen obsoleta
+      expect(mockFirebaseStorageService.deleteMultipleImages).toHaveBeenCalledWith(
+        expect.arrayContaining([expect.stringContaining('autos/ABC-123/image2.jpg')])
+      );
+
+      // Verificar que se subió la nueva imagen
+      expect(mockFirebaseStorageService.uploadMultipleImages).toHaveBeenCalledWith(
+        nuevosArchivos,
+        expect.objectContaining({
+          folder: 'autos/ABC-123',
+          allowedTypes: ['image/jpeg', 'image/png', 'image/webp']
+        })
+      );
+
+      // Verificar que se registró el cambio de imágenes en el historial
+      expect(mockHistorialRepository.crear).toHaveBeenCalledWith(
+        expect.objectContaining({
+          props: expect.objectContaining({
+            campoAfectado: 'imagenes',
+            observaciones: expect.stringContaining('Imágenes actualizadas')
+          })
+        })
+      );
+    });
+
     it('debería actualizar un auto exitosamente y registrar cambios en historial', async () => {
       // Arrange
       const autoId = '123e4567-e89b-12d3-a456-426614174000';
@@ -119,7 +201,7 @@ describe('ActualizarAutoUseCase', () => {
       mockHistorialRepository.crear.mockResolvedValue(mockHistorial as any);
 
       // Act
-      const result = await useCase.execute(autoId, validActualizarAutoDTO, userId);
+      const result = await useCase.execute(autoId, validActualizarAutoDTO, [], userId);
 
       // Assert
       expect(result).toBeInstanceOf(Auto);
@@ -201,7 +283,7 @@ describe('ActualizarAutoUseCase', () => {
       mockAutoRepository.update.mockResolvedValue(undefined);
 
       // Act
-      const result = await useCase.execute(autoId, sinCambios, userId);
+      const result = await useCase.execute(autoId, sinCambios, [], userId);
 
       // Assert
       expect(result).toBeInstanceOf(Auto);
@@ -220,10 +302,10 @@ describe('ActualizarAutoUseCase', () => {
       mockAutoRepository.findOneById.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(useCase.execute(autoId, validActualizarAutoDTO, userId))
+      await expect(useCase.execute(autoId, validActualizarAutoDTO, [], userId))
         .rejects.toThrow(NotFoundException);
       
-      await expect(useCase.execute(autoId, validActualizarAutoDTO, userId))
+      await expect(useCase.execute(autoId, validActualizarAutoDTO, [], userId))
         .rejects.toThrow('Auto no encontrado');
 
       // No debería llamar a update si no encuentra el auto
@@ -241,7 +323,7 @@ describe('ActualizarAutoUseCase', () => {
       mockAutoRepository.update.mockResolvedValue(undefined);
 
       // Act
-      const result = await useCase.execute(autoId, parcialUpdate, userId);
+      const result = await useCase.execute(autoId, parcialUpdate, [], userId);
 
       // Assert
       expect(result.precio).toBe(25000);
@@ -260,7 +342,7 @@ describe('ActualizarAutoUseCase', () => {
       mockAutoRepository.findOneById.mockResolvedValue(existingAuto);
 
       // Act & Assert
-      await expect(useCase.execute(autoId, invalidUpdate, userId))
+      await expect(useCase.execute(autoId, invalidUpdate, [], userId))
         .rejects.toThrow('El precio y costo no pueden ser negativos');
 
       // No debería llamar a update si la validación falla
@@ -276,7 +358,7 @@ describe('ActualizarAutoUseCase', () => {
       mockAutoRepository.findOneById.mockRejectedValue(repositoryError);
 
       // Act & Assert
-      await expect(useCase.execute(autoId, validActualizarAutoDTO, userId))
+      await expect(useCase.execute(autoId, validActualizarAutoDTO, [], userId))
         .rejects.toThrow('Error de conexión a BD');
     });
 
@@ -291,7 +373,7 @@ describe('ActualizarAutoUseCase', () => {
       mockAutoRepository.update.mockRejectedValue(repositoryError);
 
       // Act & Assert
-      await expect(useCase.execute(autoId, validActualizarAutoDTO, userId))
+      await expect(useCase.execute(autoId, validActualizarAutoDTO, [], userId))
         .rejects.toThrow('Error al actualizar en BD');
     });
 
@@ -311,7 +393,7 @@ describe('ActualizarAutoUseCase', () => {
       mockAutoRepository.update.mockResolvedValue(undefined);
 
       // Act
-      const result = await useCase.execute(autoId, multipleFieldsUpdate, userId);
+      const result = await useCase.execute(autoId, multipleFieldsUpdate, [], userId);
 
       // Assert
       expect(result.precio).toBe(multipleFieldsUpdate.precio);
@@ -333,7 +415,7 @@ describe('ActualizarAutoUseCase', () => {
       mockAutoRepository.update.mockResolvedValue(undefined);
 
       // Act
-      const result = await useCase.execute(autoId, validActualizarAutoDTO, userId);
+      const result = await useCase.execute(autoId, validActualizarAutoDTO, [], userId);
 
       // Assert
       expect(result.id).toBe(autoId);

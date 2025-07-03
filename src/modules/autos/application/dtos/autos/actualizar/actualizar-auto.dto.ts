@@ -1,6 +1,7 @@
 import { PartialType, OmitType } from '@nestjs/mapped-types';
 import { CrearAutoDTO } from '../crear/crear-auto.dto';
-import { IsString, Length } from 'class-validator';
+import { IsString, Length, IsArray, IsOptional } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { IsOptionalNotEmpty } from '../../../../../shared/decorators/optional-not-empty.decorator';
 
 // Extender de CrearAutoDTO pero omitiendo campos que no deben actualizarse
@@ -27,4 +28,11 @@ export class ActualizarAutoDTO extends PartialType(
   @IsOptionalNotEmpty({ message: 'La versión no puede estar vacía' })
   @IsString()
   version?: string;
+
+  // Campo para manejar imágenes existentes que se quieren mantener
+  // El frontend enviará las URLs de las imágenes que quiere conservar
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  imagenes?: string[];
 }
