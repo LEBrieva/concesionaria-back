@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Usuario } from 'src/modules/usuarios/domain/usuario.entity';
 import { IUsuarioRepository } from 'src/modules/usuarios/domain/usuario.repository';
-import { ActualizarPasswordDto } from '../../dtos/actualizar/actualizar-password.dto';
+import { ActualizarPasswordDto } from '../dtos/actualizar/actualizar-password.dto';
 import { PasswordService } from 'src/modules/shared/services/password.service';
 
 @Injectable()
@@ -25,7 +25,7 @@ export class ActualizarPasswordUseCase {
     );
 
     if (!isCurrentPasswordValid) {
-      throw new BadRequestException('La contraseña actual es incorrecta');
+      throw new UnauthorizedException('La contraseña actual es incorrecta');
     }
 
     // Hashear la nueva contraseña

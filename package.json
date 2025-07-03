@@ -99,6 +99,8 @@
     "testEnvironment": "node",
     "moduleNameMapper": {
       "^@autos/(.*)$": "<rootDir>/modules/autos/$1",
+      "^@usuarios/(.*)$": "<rootDir>/modules/usuarios/$1",
+      "^@auth/(.*)$": "<rootDir>/modules/auth/$1",
       "^@shared/(.*)$": "<rootDir>/modules/shared/$1",
       "^@config/(.*)$": "<rootDir>/config/$1",
       "^src/(.*)$": "<rootDir>/$1"

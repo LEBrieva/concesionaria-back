@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { CambiarEstadoAutoUseCase } from './cambiar-estado-auto.use-case';
-import { IAutoRepository } from '../../../domain/auto.repository';
-import { HistorialService } from '../../../../shared/services/historial.service';
-import { IHistorialRepository } from '../../../../shared/interfaces/historial';
-import { Auto } from '../../../domain/auto.entity';
-import { EstadoAuto, Marca, Color, Transmision } from '../../../domain/auto.enum';
-import { TipoEntidad } from '../../../../shared/entities/historial.entity';
-import { CambiarEstadoAutoDto } from '@autos/application/dtos/cambio-estado/cambiar-estado-auto.dto';
+import { IAutoRepository } from '../../domain/auto.repository';
+import { HistorialService } from '@shared/services/historial.service';
+import { IHistorialRepository } from '@shared/interfaces/historial';
+import { Auto } from '../../domain/auto.entity';
+import { EstadoAuto, Marca, Color, Transmision } from '../../domain/auto.enum';
+import { TipoEntidad } from '@shared/entities/historial.entity';
+import { CambiarEstadoAutoDto } from '../dtos/cambio-estado/cambiar-estado-auto.dto';
 
 describe('CambiarEstadoAutoUseCase', () => {
   let useCase: CambiarEstadoAutoUseCase;

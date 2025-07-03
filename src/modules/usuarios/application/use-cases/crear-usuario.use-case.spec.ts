@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, ForbiddenException } from '@nestjs/common';
 import { CrearUsuarioUseCase } from './crear-usuario.use-case';
-import { IUsuarioRepository } from '../../../domain/usuario.repository';
-import { PasswordService } from '../../../../shared/services/password.service';
-import { CrearUsuarioDto } from '../../dtos/crear/crear-usuario.dto';
-import { RolUsuario } from '../../../domain/usuario.enum';
-import { Usuario } from '../../../domain/usuario.entity';
-import { AuthenticatedUser } from '../../../../auth/domain/interfaces/authenticated-user.interface';
-import { HistorialService } from '../../../../shared/services/historial.service';
-import { IHistorialRepository } from '../../../../shared/interfaces/historial';
-import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
+import { IUsuarioRepository } from '../../domain/usuario.repository';
+import { PasswordService } from '@shared/services/password.service';
+import { CrearUsuarioDto } from '../dtos/crear/crear-usuario.dto';
+import { RolUsuario } from '../../domain/usuario.enum';
+import { Usuario } from '../../domain/usuario.entity';
+import { AuthenticatedUser } from '../../../auth/domain/interfaces/authenticated-user.interface';
+import { HistorialService } from '@shared/services/historial.service';
+import { IHistorialRepository } from '@shared/interfaces/historial';
+import { TipoEntidad, TipoAccion } from '@shared/entities/historial.entity';
 
 describe('CrearUsuarioUseCase', () => {
   let useCase: CrearUsuarioUseCase;

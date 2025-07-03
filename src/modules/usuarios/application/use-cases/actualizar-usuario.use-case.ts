@@ -1,10 +1,10 @@
-import { ActualizarUsuarioDto } from '../../dtos/actualizar/actualizar-usuario.dto';
-import { Usuario } from '../../../domain/usuario.entity';
-import { IUsuarioRepository } from '../../../domain/usuario.repository';
+import { ActualizarUsuarioDto } from '../dtos/actualizar/actualizar-usuario.dto';
+import { Usuario } from '../../domain/usuario.entity';
+import { IUsuarioRepository } from '../../domain/usuario.repository';
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
-import { PasswordService } from '../../../../shared/services/password.service';
-import { HistorialService } from '../../../../shared/services/historial.service';
-import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
+import { PasswordService } from '../../../shared/services/password.service';
+import { HistorialService } from '../../../shared/services/historial.service';
+import { TipoEntidad, TipoAccion } from '../../../shared/entities/historial.entity';
 
 @Injectable()
 export class ActualizarUsuarioUseCase {

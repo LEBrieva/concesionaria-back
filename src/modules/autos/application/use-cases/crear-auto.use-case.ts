@@ -1,10 +1,10 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { Auto } from '../../../domain/auto.entity';
+import { Auto } from '../../domain/auto.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { CrearAutoDTO } from '@autos/application/dtos/crear/crear-auto.dto';
 import { IAutoRepository } from '@autos/domain/auto.repository';
-import { HistorialService } from '../../../../shared/services/historial.service';
-import { TipoEntidad } from '../../../../shared/entities/historial.entity';
+import { HistorialService } from '@shared/services/historial.service';
+import { TipoEntidad } from '@shared/entities/historial.entity';
 
 @Injectable()
 export class CrearAutoUseCase {

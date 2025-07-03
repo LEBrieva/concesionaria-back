@@ -1,13 +1,13 @@
 import { Injectable, ConflictException, ForbiddenException, Inject } from '@nestjs/common';
 import { Usuario } from 'src/modules/usuarios/domain/usuario.entity';
 import { IUsuarioRepository } from 'src/modules/usuarios/domain/usuario.repository';
-import { CrearUsuarioDto } from '../../dtos/crear/crear-usuario.dto';
+import { CrearUsuarioDto } from '../dtos/crear/crear-usuario.dto';
 import { PasswordService } from 'src/modules/shared/services/password.service';
 import { RolUsuario } from 'src/modules/usuarios/domain/usuario.enum';
 import { AuthenticatedUser } from 'src/modules/auth/domain/interfaces/authenticated-user.interface';
-import { randomUUID } from 'crypto';
-import { HistorialService } from '../../../../shared/services/historial.service';
-import { TipoEntidad } from '../../../../shared/entities/historial.entity';
+import { v4 as uuidv4 } from 'uuid';
+import { HistorialService } from '@shared/services/historial.service';
+import { TipoEntidad } from '@shared/entities/historial.entity';
 
 @Injectable()
 export class CrearUsuarioUseCase {
@@ -31,7 +31,7 @@ export class CrearUsuarioUseCase {
     const hashedPassword = await this.passwordService.hashPassword(dto.password);
 
     const usuario = new Usuario({
-      id: randomUUID(), // Generar UUID v4
+      id: uuidv4(), // Generar UUID v4
       nombre: dto.nombre,
       apellido: dto.apellido,
       email: dto.email,

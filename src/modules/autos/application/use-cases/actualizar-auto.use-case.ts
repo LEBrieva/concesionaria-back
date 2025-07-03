@@ -1,9 +1,9 @@
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { ActualizarAutoDTO } from '@autos/application/dtos/actualizar/actualizar-auto.dto';
 import { Auto } from '@autos/domain/auto.entity';
 import { IAutoRepository } from '@autos/domain/auto.repository';
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { HistorialService } from '../../../../shared/services/historial.service';
-import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
+import { HistorialService } from '@shared/services/historial.service';
+import { TipoEntidad, TipoAccion } from '@shared/entities/historial.entity';
 
 @Injectable()
 export class ActualizarAutoUseCase {

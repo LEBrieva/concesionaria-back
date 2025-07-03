@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { EliminarUsuarioUseCase } from './eliminar-usuario.use-case';
-import { IUsuarioRepository } from '../../../domain/usuario.repository';
-import { HistorialService } from '../../../../shared/services/historial.service';
-import { IHistorialRepository } from '../../../../shared/interfaces/historial';
-import { Usuario } from '../../../domain/usuario.entity';
-import { RolUsuario } from '../../../domain/usuario.enum';
-import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
+import { IUsuarioRepository } from '../../domain/usuario.repository';
+import { HistorialService } from '@shared/services/historial.service';
+import { IHistorialRepository } from '@shared/interfaces/historial';
+import { Usuario } from '../../domain/usuario.entity';
+import { RolUsuario } from '../../domain/usuario.enum';
+import { TipoEntidad, TipoAccion } from '@shared/entities/historial.entity';
 
 describe('EliminarUsuarioUseCase', () => {
   let useCase: EliminarUsuarioUseCase;

@@ -1,10 +1,10 @@
 import { Injectable, Inject, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
-import { FirebaseStorageService } from '../../../../shared/services/firebase-storage.service';
-import { ImageUploadResult } from '../../../../shared/interfaces';
-import { IAutoRepository } from '../../../domain/auto.repository';
-import { SubirImagenesResponseDto, ImagenSubidaResponseDto } from '../../dtos/imagenes/imagenes-response.dto';
-import { HistorialService } from '../../../../shared/services/historial.service';
-import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
+import { FirebaseStorageService } from '../../../shared/services/firebase-storage.service';
+import { ImageUploadResult } from '../../../shared/interfaces';
+import { IAutoRepository } from '../../domain/auto.repository';
+import { SubirImagenesResponseDto, ImagenSubidaResponseDto } from '../dtos/imagenes/imagenes-response.dto';
+import { HistorialService } from '../../../shared/services/historial.service';
+import { TipoEntidad, TipoAccion } from '../../../shared/entities/historial.entity';
 
 @Injectable()
 export class SubirImagenesAutoUseCase {

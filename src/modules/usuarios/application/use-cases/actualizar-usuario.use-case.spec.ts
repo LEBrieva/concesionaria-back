@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { ActualizarUsuarioUseCase } from './actualizar-usuario.use-case';
-import { IUsuarioRepository } from '../../../domain/usuario.repository';
-import { PasswordService } from '../../../../shared/services/password.service';
-import { ActualizarUsuarioDto } from '../../dtos/actualizar/actualizar-usuario.dto';
-import { Usuario } from '../../../domain/usuario.entity';
-import { RolUsuario } from '../../../domain/usuario.enum';
-import { UsuarioProps } from '../../../domain/usuario.interfaces';
-import { HistorialService } from '../../../../shared/services/historial.service';
-import { IHistorialRepository } from '../../../../shared/interfaces/historial';
-import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
+import { IUsuarioRepository } from '../../domain/usuario.repository';
+import { PasswordService } from '@shared/services/password.service';
+import { ActualizarUsuarioDto } from '../dtos/actualizar/actualizar-usuario.dto';
+import { Usuario } from '../../domain/usuario.entity';
+import { RolUsuario } from '../../domain/usuario.enum';
+import { UsuarioProps } from '../../domain/usuario.interfaces';
+import { HistorialService } from '@shared/services/historial.service';
+import { IHistorialRepository } from '@shared/interfaces/historial';
+import { TipoEntidad, TipoAccion } from '@shared/entities/historial.entity';
 
 describe('ActualizarUsuarioUseCase', () => {
   let useCase: ActualizarUsuarioUseCase;

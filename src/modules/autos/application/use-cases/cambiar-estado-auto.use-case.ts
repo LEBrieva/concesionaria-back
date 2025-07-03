@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
-import { IAutoRepository } from '../../../domain/auto.repository';
-import { HistorialService } from '../../../../shared/services/historial.service';
-import { TipoEntidad } from '../../../../shared/entities/historial.entity';
-import { CambiarEstadoAutoDto, CambiarEstadoAutoResponseDto } from '../../dtos/cambio-estado/cambiar-estado-auto.dto';
-import { EstadoAuto } from '../../../domain/auto.enum';
+import { IAutoRepository } from '../../domain/auto.repository';
+import { HistorialService } from '../../../shared/services/historial.service';
+import { TipoEntidad } from '../../../shared/entities/historial.entity';
+import { CambiarEstadoAutoDto, CambiarEstadoAutoResponseDto } from '../dtos/cambio-estado/cambiar-estado-auto.dto';
+import { EstadoAuto } from '../../domain/auto.enum';
 
 @Injectable()
 export class CambiarEstadoAutoUseCase {

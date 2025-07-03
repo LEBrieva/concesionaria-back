@@ -1,10 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { EliminarAutoUseCase } from './eliminar-auto.use-case';
-import { IAutoRepository } from '@autos/domain/auto.repository';
-import { HistorialService } from '../../../../shared/services/historial.service';
-import { Auto } from '@autos/domain/auto.entity';
-import { Marca, EstadoAuto, Transmision, Color } from '@autos/domain/auto.enum';
+import { IAutoRepository } from '../../domain/auto.repository';
+import { HistorialService } from '@shared/services/historial.service';
+import { Auto } from '../../domain/auto.entity';
+import { Marca, EstadoAuto, Transmision, Color } from '../../domain/auto.enum';
+import { IHistorialRepository } from '@shared/interfaces/historial';
+import { TipoEntidad } from '@shared/entities/historial.entity';
+import { AutoProps } from '../../domain/interfaces/auto.interfaces';
 
 describe('EliminarAutoUseCase', () => {
   let useCase: EliminarAutoUseCase;

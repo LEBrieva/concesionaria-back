@@ -1,7 +1,7 @@
 import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
-import { IAutoRepository } from '@autos/domain/auto.repository';
-import { HistorialService } from '../../../../shared/services/historial.service';
-import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
+import { IAutoRepository } from '../../domain/auto.repository';
+import { HistorialService } from '../../../shared/services/historial.service';
+import { TipoEntidad, TipoAccion } from '../../../shared/entities/historial.entity';
 
 @Injectable()
 export class RestaurarAutoUseCase {

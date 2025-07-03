@@ -1,7 +1,7 @@
 import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
-import { IUsuarioRepository } from '../../../domain/usuario.repository';
-import { HistorialService } from '../../../../shared/services/historial.service';
-import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
+import { IUsuarioRepository } from '../../domain/usuario.repository';
+import { HistorialService } from '../../../shared/services/historial.service';
+import { TipoEntidad, TipoAccion } from '../../../shared/entities/historial.entity';
 
 @Injectable()
 export class EliminarUsuarioUseCase {

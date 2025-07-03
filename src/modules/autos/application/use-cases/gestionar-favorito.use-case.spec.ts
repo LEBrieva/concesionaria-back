@@ -1,12 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { GestionarFavoritoUseCase } from './gestionar-favorito.use-case';
-import { IAutoRepository } from '@autos/domain/auto.repository';
-import { HistorialService } from '../../../../shared/services/historial.service';
-import { Auto } from '@autos/domain/auto.entity';
-import { AutoProps } from '@autos/domain/interfaces/auto.interfaces';
-import { Marca, EstadoAuto, Transmision, Color } from '@autos/domain/auto.enum';
-import { GestionarFavoritoDto } from '@autos/application/dtos/favoritos/gestionar-favorito.dto';
+import { IAutoRepository } from '../../domain/auto.repository';
+import { HistorialService } from '@shared/services/historial.service';
+import { IHistorialRepository } from '@shared/interfaces/historial';
+import { Auto } from '../../domain/auto.entity';
+import { AutoProps } from '../../domain/interfaces/auto.interfaces';
+import { Marca, EstadoAuto, Transmision, Color } from '../../domain/auto.enum';
+import { GestionarFavoritoDto } from '../dtos/favoritos/gestionar-favorito.dto';
 
 describe('GestionarFavoritoUseCase', () => {
   let useCase: GestionarFavoritoUseCase;

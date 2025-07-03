@@ -3,11 +3,11 @@ import { CrearUsuarioDto } from '../../application/dtos/crear/crear-usuario.dto'
 import { CrearUsuarioResponseDto } from '../../application/dtos/crear/crear-usuario-response.dto';
 import { ActualizarPasswordDto } from '../../application/dtos/actualizar/actualizar-password.dto';
 import { ActualizarUsuarioDto } from '../../application/dtos/actualizar/actualizar-usuario.dto';
-import { CrearUsuarioUseCase } from '../../application/use-cases/usuarios/crear-usuario.use-case';
-import { ActualizarPasswordUseCase } from '../../application/use-cases/usuarios/actualizar-password.use-case';
-import { ActualizarUsuarioUseCase } from '../../application/use-cases/usuarios/actualizar-usuario.use-case';
-import { EliminarUsuarioUseCase } from '../../application/use-cases/usuarios/eliminar-usuario.use-case';
-import { RestaurarUsuarioUseCase } from '../../application/use-cases/usuarios/restaurar-usuario.use-case';
+import { CrearUsuarioUseCase } from '../../application/use-cases/crear-usuario.use-case';
+import { ActualizarPasswordUseCase } from '../../application/use-cases/actualizar-password.use-case';
+import { ActualizarUsuarioUseCase } from '../../application/use-cases/actualizar-usuario.use-case';
+import { EliminarUsuarioUseCase } from '../../application/use-cases/eliminar-usuario.use-case';
+import { RestaurarUsuarioUseCase } from '../../application/use-cases/restaurar-usuario.use-case';
 import { UsuarioQueryService } from '../../application/services/usuario-query.service';
 import { UsuarioToHttpMapper } from '../../application/mappers/usuario-to-http.mapper';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
