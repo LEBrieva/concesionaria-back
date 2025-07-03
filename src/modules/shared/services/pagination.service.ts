@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BaseEntity } from '../entities/base.entity';
-import { IBaseRepository, BaseFilters } from '../interfaces/base-repository.interface';
+import { IBaseRepository, BaseFilters } from '../interfaces';
 import { BasePaginationDto, PaginatedResponseDto } from '../dtos/pagination.dto';
 
 @Injectable()

@@ -1,5 +1,5 @@
-import { BaseProps } from './base-props.interface';
-import { TipoAccion, TipoEntidad } from '../entities/historial.entity';
+import { BaseProps } from '../base/base-props.interface';
+import { TipoAccion, TipoEntidad } from '../../entities/historial.entity';
 
 export interface HistorialProps extends BaseProps {
   entidadId: string;

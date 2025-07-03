@@ -1,4 +1,4 @@
-import { BaseFilters } from '../../../shared/interfaces/base-repository.interface';
+import { BaseFilters } from '../../../shared/interfaces';
 import { RolUsuario } from '@prisma/client';
 
 export interface UsuarioFilters extends BaseFilters {

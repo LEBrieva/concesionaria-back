@@ -1,5 +1,5 @@
-import { BaseEntity } from '../entities/base.entity';
-import { BasePaginationResult } from '../dtos/pagination.dto';
+import { BaseEntity } from '../../entities/base.entity';
+import { BasePaginationResult } from '../../dtos/pagination.dto';
 
 export interface BaseFilters {
   incluirEliminados?: boolean;

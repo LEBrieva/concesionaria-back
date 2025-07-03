@@ -1,21 +1,23 @@
 import { Injectable, Logger, BadRequestException, OnModuleInit } from '@nestjs/common';
 import * as admin from 'firebase-admin';
+import { Bucket, File } from '@google-cloud/storage';
 import { randomUUID } from 'crypto';
-import { ImageUploadResult, ImageUploadOptions } from '../interfaces/firebase-storage.interfaces';
+import { 
+  ImageUploadResult, 
+  ImageUploadOptions,
+  FirebaseStorageConfig,
+  ImageInfo,
+  ValidationConfig,
+  HealthCheckSuccess,
+  HealthCheckError
+} from '../interfaces/firebase';
 import { FirebaseService } from './firebase.service';
-
-interface FirebaseStorageConfig {
-  bucketName: string;
-  maxSizeMB: number;
-  allowedTypes: string[];
-  maxFiles: number;
-}
 
 @Injectable()
 export class FirebaseStorageService implements OnModuleInit {
   private readonly logger = new Logger(FirebaseStorageService.name);
   private config: FirebaseStorageConfig;
-  private bucket: any | null = null;
+  private bucket: Bucket | null = null;
 
   constructor(private readonly firebaseService: FirebaseService) {}
 
@@ -85,7 +87,7 @@ export class FirebaseStorageService implements OnModuleInit {
   /**
    * Obtiene la instancia del bucket, inicializándola si es necesario
    */
-  private async getBucket(): Promise<any> {
+  private async getBucket(): Promise<Bucket> {
     if (!this.bucket) {
       await this.initializeBucket();
     }
@@ -159,7 +161,7 @@ export class FirebaseStorageService implements OnModuleInit {
    */
   private async uploadFileToStorage(
     file: Express.Multer.File, 
-    fileRef: any
+    fileRef: File
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       const stream = fileRef.createWriteStream({
@@ -272,18 +274,18 @@ export class FirebaseStorageService implements OnModuleInit {
   /**
    * Obtiene información de una imagen
    */
-  async getImageInfo(filePath: string): Promise<any> {
+  async getImageInfo(filePath: string): Promise<ImageInfo> {
     try {
       const bucket = await this.getBucket();
       const file = bucket.file(filePath);
 
       const [metadata] = await file.getMetadata();
       return {
-        name: metadata.name,
+        name: metadata.name || filePath,
         size: metadata.size ? parseInt(metadata.size.toString()) : 0,
-        contentType: metadata.contentType,
-        created: metadata.timeCreated,
-        updated: metadata.updated,
+        contentType: metadata.contentType || 'unknown',
+        created: metadata.timeCreated || new Date().toISOString(),
+        updated: metadata.updated || new Date().toISOString(),
         publicUrl: this.buildPublicUrl(filePath),
       };
 
@@ -296,7 +298,7 @@ export class FirebaseStorageService implements OnModuleInit {
   /**
    * Valida que el archivo sea una imagen válida
    */
-  private validateImage(file: Express.Multer.File, config: any): void {
+  private validateImage(file: Express.Multer.File, config: ValidationConfig): void {
     if (!file) {
       throw new BadRequestException('No se proporcionó ningún archivo');
     }
@@ -380,7 +382,7 @@ export class FirebaseStorageService implements OnModuleInit {
   /**
    * Verifica si Firebase Storage está configurado correctamente
    */
-  async healthCheck(): Promise<{ status: string; message: string; details?: any }> {
+  async healthCheck(): Promise<HealthCheckSuccess | HealthCheckError> {
     try {
       const bucket = await this.getBucket();
       await bucket.getMetadata();

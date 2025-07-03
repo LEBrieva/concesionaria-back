@@ -1,7 +1,7 @@
 import { BaseEntity } from 'src/modules/shared/entities/base.entity';
 import { Color, EstadoAuto, Transmision, Marca } from './auto.enum';
 import { AutoProps } from './interfaces/auto.interfaces';
-import { BaseProps } from 'src/modules/shared/interfaces/base-props.interface';
+import { BaseProps } from 'src/modules/shared/interfaces';
 
 export class Auto extends BaseEntity {
   private readonly props: AutoProps;

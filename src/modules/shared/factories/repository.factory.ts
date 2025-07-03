@@ -1,7 +1,7 @@
 import { Injectable, Type } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { BaseEntity } from '../entities/base.entity';
-import { IBaseRepository } from '../interfaces/base-repository.interface';
+import { IBaseRepository } from '../interfaces';
 
 export interface RepositoryConfig<T extends BaseEntity> {
   entityName: string;

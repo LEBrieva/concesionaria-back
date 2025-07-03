@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { BaseEntity } from '../entities/base.entity';
-import { IBaseRepository, BaseFilters } from '../interfaces/base-repository.interface';
+import { IBaseRepository, BaseFilters } from '../interfaces';
 import { BasePaginationResult } from '../dtos/pagination.dto';
 
 @Injectable()
