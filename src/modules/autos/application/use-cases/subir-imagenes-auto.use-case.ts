@@ -1,8 +1,8 @@
 import { Injectable, Inject, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { FirebaseStorageService } from '@shared/services/firebase-storage.service';
-import { ImageUploadResult } from '../../../../shared/interfaces';
+import { ImageUploadResult } from '@shared/interfaces';
 import { IAutoRepository } from '@autos/domain/auto.repository';
-import { SubirImagenesResponseDto, ImagenSubidaResponseDto } from '../../dtos/imagenes/imagenes-response.dto';
+import { SubirImagenesResponseDto, ImagenSubidaResponseDto } from '../dtos/imagenes/imagenes-response.dto';
 import { HistorialService } from '@shared/services/historial.service';
 import { TipoAccion, TipoEntidad } from '@shared/entities/historial.entity';
 

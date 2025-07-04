@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { EliminarAutoUseCase } from './eliminar-auto.use-case';
 import { IAutoRepository } from '@autos/domain/auto.repository';
-import { HistorialService } from '../../../../shared/services/historial.service';
+import { HistorialService } from '@shared/services/historial.service';
 import { Auto } from '@autos/domain/auto.entity';
 import { Marca, EstadoAuto, Transmision, Color } from '@autos/domain/auto.enum';
 

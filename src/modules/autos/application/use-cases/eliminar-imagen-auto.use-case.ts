@@ -1,8 +1,8 @@
 import { Injectable, Inject, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
-import { FirebaseStorageService } from '../../../../shared/services/firebase-storage.service';
-import { IAutoRepository } from '../../../domain/auto.repository';
-import { HistorialService } from '../../../../shared/services/historial.service';
-import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
+import { FirebaseStorageService } from '@shared/services/firebase-storage.service';
+import { IAutoRepository } from '../../domain/auto.repository';
+import { HistorialService } from '@shared/services/historial.service';
+import { TipoEntidad, TipoAccion } from '@shared/entities/historial.entity';
 
 @Injectable()
 export class EliminarImagenAutoUseCase {

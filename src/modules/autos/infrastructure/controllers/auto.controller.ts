@@ -17,16 +17,16 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { CrearAutoDTO } from '@autos/application/dtos/crear/crear-auto.dto';
-import { CrearAutoUseCase } from '@autos/application/use-cases/autos/crear-auto.use-case';
+import { CrearAutoUseCase } from '@autos/application/use-cases/crear-auto.use-case';
 import { AutoMapper } from '@autos/application/mappers/auto-to-http.mapper';
 import { AutoResponseDTO } from '@autos/application/dtos/crear/crear-auto-response.dto';
 import { ActualizarAutoDTO } from '@autos/application/dtos/actualizar/actualizar-auto.dto';
-import { ActualizarAutoUseCase } from '@autos/application/use-cases/autos/actualizar-auto.use-case';
-import { EliminarAutoUseCase } from '@autos/application/use-cases/autos/eliminar-auto.use-case';
-import { RestaurarAutoUseCase } from '@autos/application/use-cases/autos/restaurar-auto.use-case';
-import { CambiarEstadoAutoUseCase } from '../../application/use-cases/autos/cambiar-estado-auto.use-case';
-import { GestionarFavoritoUseCase } from '../../application/use-cases/autos/gestionar-favorito.use-case';
-import { ObtenerFavoritosUseCase } from '../../application/use-cases/autos/obtener-favoritos.use-case';
+import { ActualizarAutoUseCase } from '@autos/application/use-cases/actualizar-auto.use-case';
+import { EliminarAutoUseCase } from '@autos/application/use-cases/eliminar-auto.use-case';
+import { RestaurarAutoUseCase } from '@autos/application/use-cases/restaurar-auto.use-case';
+import { CambiarEstadoAutoUseCase } from '../../application/use-cases/cambiar-estado-auto.use-case';
+import { GestionarFavoritoUseCase } from '../../application/use-cases/gestionar-favorito.use-case';
+import { ObtenerFavoritosUseCase } from '../../application/use-cases/obtener-favoritos.use-case';
 import { AutoQueryService } from '@autos/application/services/auto-query.service';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/infrastructure/guards/roles.guard';
@@ -39,8 +39,8 @@ import { GestionarFavoritoDto } from '../../application/dtos/favoritos/gestionar
 import { AutoPaginationDto } from '../../application/dtos/pagination/auto-pagination.dto';
 import { MarcasDisponiblesResponseDto } from '../../application/dtos/marcas/marcas-disponibles.dto';
 import { PaginatedResponseDto } from '../../../shared/dtos/pagination.dto';
-import { SubirImagenesAutoUseCase } from '../../application/use-cases/autos/subir-imagenes-auto.use-case';
-import { EliminarImagenAutoUseCase } from '../../application/use-cases/autos/eliminar-imagen-auto.use-case';
+import { SubirImagenesAutoUseCase } from '../../application/use-cases/subir-imagenes-auto.use-case';
+import { EliminarImagenAutoUseCase } from '../../application/use-cases/eliminar-imagen-auto.use-case';
 import { 
   SubirImagenesResponseDto, 
   EliminarImagenDto 

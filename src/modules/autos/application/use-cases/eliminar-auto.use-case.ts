@@ -1,10 +1,12 @@
-import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { IAutoRepository } from '@autos/domain/auto.repository';
-import { HistorialService } from '../../../../shared/services/historial.service';
-import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
+import { HistorialService } from '@shared/services/historial.service';
+import { TipoEntidad } from '@shared/entities/historial.entity';
 
 @Injectable()
-export class RestaurarAutoUseCase {
+export class EliminarAutoUseCase {
+  private readonly logger = new Logger(EliminarAutoUseCase.name);
+
   constructor(
     @Inject('IAutoRepository')
     private readonly autoRepository: IAutoRepository,
@@ -18,20 +20,20 @@ export class RestaurarAutoUseCase {
       throw new NotFoundException('Auto no encontrado');
     }
 
-    // Verificar que el auto esté eliminado
-    if (auto.isActive()) {
-      throw new BadRequestException('El auto ya está activo');
+    // Verificar que el auto no esté ya eliminado
+    if (auto.isDeleted()) {
+      throw new BadRequestException('El auto ya está eliminado');
     }
 
-    // Restaurar el auto
-    await this.autoRepository.restore(id);
+    // Realizar eliminación lógica
+    await this.autoRepository.softDelete(id);
 
     // Registrar en historial
-    await this.historialService.registrarRestauracion(
+    await this.historialService.registrarEliminacion(
       id,
       TipoEntidad.AUTO,
       usuarioId,
-      observaciones || `Auto restaurado: ${auto.nombre} - ${auto.matricula}`,
+      observaciones || `Auto eliminado: ${auto.nombre} - ${auto.matricula}`,
       {
         autoNombre: auto.nombre,
         autoMatricula: auto.matricula,
@@ -40,9 +42,7 @@ export class RestaurarAutoUseCase {
         autoAno: auto.ano,
         autoPrecio: auto.precio,
         autoEstado: auto.estado,
-        motivoRestauracion: observaciones || 'Restauración solicitada',
-        estadoAnterior: 'eliminado',
-        estadoNuevo: 'activo',
+        motivoEliminacion: observaciones || 'Sin motivo especificado',
       }
     );
   }

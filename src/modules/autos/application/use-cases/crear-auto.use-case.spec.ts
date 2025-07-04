@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CrearAutoUseCase } from './crear-auto.use-case';
-import { IAutoRepository } from '../../../domain/auto.repository';
-import { CrearAutoDTO } from '../../dtos/crear/crear-auto.dto';
-import { Marca, EstadoAuto, Transmision, Color } from '../../../domain/auto.enum';
-import { Auto } from '../../../domain/auto.entity';
-import { HistorialService } from '../../../../shared/services/historial.service';
-import { IHistorialRepository } from '../../../../shared/interfaces/historial';
-import { TipoEntidad } from '../../../../shared/entities/historial.entity';
+import { IAutoRepository } from '../../domain/auto.repository';
+import { CrearAutoDTO } from '../dtos/crear/crear-auto.dto';
+import { Marca, EstadoAuto, Transmision, Color } from '../../domain/auto.enum';
+import { Auto } from '../../domain/auto.entity';
+import { HistorialService } from '@shared/services/historial.service';
+import { IHistorialRepository } from '@shared/interfaces/historial';
+import { TipoEntidad } from '@shared/entities/historial.entity';
 
 describe('CrearAutoUseCase', () => {
   let useCase: CrearAutoUseCase;
