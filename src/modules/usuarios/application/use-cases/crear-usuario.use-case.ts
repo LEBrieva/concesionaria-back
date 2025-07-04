@@ -1,13 +1,13 @@
 import { Injectable, ConflictException, ForbiddenException, Inject } from '@nestjs/common';
-import { Usuario } from 'src/modules/usuarios/domain/usuario.entity';
-import { IUsuarioRepository } from 'src/modules/usuarios/domain/usuario.repository';
-import { CrearUsuarioDto } from '../../dtos/usuarios/crear/crear-usuario.dto';
-import { PasswordService } from 'src/modules/shared/services/password.service';
-import { RolUsuario } from 'src/modules/usuarios/domain/usuario.enum';
+import { Usuario } from '../../domain/usuario.entity';
+import { IUsuarioRepository } from '../../domain/usuario.repository';
+import { CrearUsuarioDto } from '../dtos/crear-usuario.dto';
+import { PasswordService } from '../../../shared/services/password.service';
+import { RolUsuario } from '../../domain/usuario.enum';
 import { AuthenticatedUser } from 'src/modules/auth/domain/interfaces/authenticated-user.interface';
 import { randomUUID } from 'crypto';
-import { HistorialService } from '../../../../shared/services/historial.service';
-import { TipoEntidad } from '../../../../shared/entities/historial.entity';
+import { HistorialService } from '@shared/services/historial.service';
+import { TipoEntidad } from '@shared/entities/historial.entity';
 
 @Injectable()
 export class CrearUsuarioUseCase {

@@ -1,6 +1,6 @@
 import { IsOptional, IsString, IsEnum } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { BasePaginationDto } from '../../../../../shared/dtos/pagination.dto';
+import { BasePaginationDto } from '@shared/dtos/pagination.dto';
 import { RolUsuario } from '@prisma/client';
 
 export class UsuarioPaginationDto extends BasePaginationDto {
@@ -18,7 +18,12 @@ export class UsuarioPaginationDto extends BasePaginationDto {
   email?: string;
 
   @IsOptional()
+  @IsString()
+  telefono?: string;
+
+  @IsOptional()
   @IsEnum(RolUsuario)
+  @Transform(({ value }) => (value ? value.toUpperCase() : undefined))
   rol?: RolUsuario;
 
   @IsOptional()

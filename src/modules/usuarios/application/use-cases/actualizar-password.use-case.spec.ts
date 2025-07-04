@@ -1,12 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { ActualizarPasswordUseCase } from './actualizar-password.use-case';
-import { IUsuarioRepository } from '../../../domain/usuario.repository';
-import { PasswordService } from '../../../../shared/services/password.service';
-import { ActualizarPasswordDto } from '../../dtos/usuarios/actualizar/actualizar-password.dto';
-import { Usuario } from '../../../domain/usuario.entity';
-import { RolUsuario } from '../../../domain/usuario.enum';
-import { UsuarioProps } from '../../../domain/usuario.interfaces';
+import { PasswordService } from '@shared/services/password.service';
+import { ActualizarPasswordDto } from '../dtos/actualizar-password.dto';
+import { Usuario } from '../../domain/usuario.entity';
+import { RolUsuario } from '../../domain/usuario.enum';
+import { UsuarioProps } from '../../domain/usuario.interfaces';
 
 describe('ActualizarPasswordUseCase', () => {
   let useCase: ActualizarPasswordUseCase;
