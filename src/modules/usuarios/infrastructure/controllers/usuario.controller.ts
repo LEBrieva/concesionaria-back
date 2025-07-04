@@ -1,13 +1,13 @@
 import { Body, Controller, Delete, Get, Patch, Post, Put, Param, UseGuards, Query } from '@nestjs/common';
-import { CrearUsuarioDto } from '../../application/dtos/usuarios/crear/crear-usuario.dto';
-import { CrearUsuarioResponseDto } from '../../application/dtos/usuarios/crear/crear-usuario-response.dto';
-import { ActualizarPasswordDto } from '../../application/dtos/usuarios/actualizar/actualizar-password.dto';
-import { ActualizarUsuarioDto } from '../../application/dtos/usuarios/actualizar/actualizar-usuario.dto';
-import { CrearUsuarioUseCase } from '../../application/use-cases/usuarios/crear-usuario.use-case';
-import { ActualizarPasswordUseCase } from '../../application/use-cases/usuarios/actualizar-password.use-case';
-import { ActualizarUsuarioUseCase } from '../../application/use-cases/usuarios/actualizar-usuario.use-case';
-import { EliminarUsuarioUseCase } from '../../application/use-cases/usuarios/eliminar-usuario.use-case';
-import { RestaurarUsuarioUseCase } from '../../application/use-cases/usuarios/restaurar-usuario.use-case';
+import { CrearUsuarioDto } from '../../application/dtos/crear-usuario.dto';
+import { CrearUsuarioResponseDto } from '../../application/dtos/crear-usuario-response.dto';
+import { ActualizarPasswordDto } from '../../application/dtos/actualizar-password.dto';
+import { ActualizarUsuarioDto } from '../../application/dtos/actualizar-usuario.dto';
+import { CrearUsuarioUseCase } from '../../application/use-cases/crear-usuario.use-case';
+import { ActualizarPasswordUseCase } from '../../application/use-cases/actualizar-password.use-case';
+import { ActualizarUsuarioUseCase } from '../../application/use-cases/actualizar-usuario.use-case';
+import { EliminarUsuarioUseCase } from '../../application/use-cases/eliminar-usuario.use-case';
+import { RestaurarUsuarioUseCase } from '../../application/use-cases/restaurar-usuario.use-case';
 import { UsuarioQueryService } from '../../application/services/usuario-query.service';
 import { UsuarioToHttpMapper } from '../../application/mappers/usuario-to-http.mapper';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
@@ -16,7 +16,7 @@ import { Roles } from '../../../auth/infrastructure/decorators/roles.decorator';
 import { CurrentUser } from '../../../auth/infrastructure/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../../../auth/domain/interfaces/authenticated-user.interface';
 import { RolUsuario } from '../../domain/usuario.enum';
-import { UsuarioPaginationDto } from '../../application/dtos/usuarios/pagination/usuario-pagination.dto';
+import { UsuarioPaginationDto } from '../../application/dtos/usuario-pagination.dto';
 import { PaginatedResponseDto, BasePaginationDto } from '../../../shared/dtos/pagination.dto';
 
 @Controller('usuarios')
