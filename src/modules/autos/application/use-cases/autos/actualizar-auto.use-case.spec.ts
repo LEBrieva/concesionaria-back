@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { ActualizarAutoUseCase } from './actualizar-auto.use-case';
 import { IAutoRepository } from '../../../domain/auto.repository';
-import { ActualizarAutoDTO } from '../../dtos/autos/actualizar/actualizar-auto.dto';
+import { ActualizarAutoDTO } from '../../dtos/actualizar/actualizar-auto.dto';
 import { Auto } from '../../../domain/auto.entity';
 import { Marca, EstadoAuto, Transmision, Color } from '../../../domain/auto.enum';
 import { AutoProps } from '../../../domain/interfaces/auto.interfaces';

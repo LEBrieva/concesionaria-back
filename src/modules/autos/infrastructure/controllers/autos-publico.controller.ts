@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { ObtenerFavoritosUseCase } from '../../application/use-cases/autos/obtener-favoritos.use-case';
 import { AutoMapper } from '@autos/application/mappers/auto-to-http.mapper';
-import { AutoResponseDTO } from '@autos/application/dtos/autos/crear/crear-auto-response.dto';
+import { AutoResponseDTO } from '@autos/application/dtos/crear/crear-auto-response.dto';
 import { AutoQueryService } from '@autos/application/services/auto-query.service';
 
 @Controller('publico/autos')

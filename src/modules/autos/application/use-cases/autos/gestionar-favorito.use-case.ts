@@ -1,8 +1,8 @@
 import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
 import { IAutoRepository } from '@autos/domain/auto.repository';
-import { GestionarFavoritoDto } from '@autos/application/dtos/autos/favoritos/gestionar-favorito.dto';
-import { HistorialService } from '../../../../shared/services/historial.service';
-import { TipoEntidad, TipoAccion } from '../../../../shared/entities/historial.entity';
+import { GestionarFavoritoDto } from '@autos/application/dtos/favoritos/gestionar-favorito.dto';
+import { HistorialService } from '@shared/services/historial.service';
+import { TipoEntidad, TipoAccion } from '@shared/entities/historial.entity';
 
 @Injectable()
 export class GestionarFavoritoUseCase {

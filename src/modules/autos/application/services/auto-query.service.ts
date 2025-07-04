@@ -2,10 +2,10 @@ import { Injectable, Inject } from '@nestjs/common';
 import { Auto } from '@autos/domain/auto.entity';
 import { IAutoRepository } from '@autos/domain/auto.repository';
 import { AutoFilters } from '@autos/domain/interfaces/auto-filters.interface';
-import { PaginationService } from '../../../shared/services/pagination.service';
-import { AutoPaginationDto } from '../dtos/autos/pagination/auto-pagination.dto';
-import { MarcasDisponiblesResponseDto } from '../dtos/autos/marcas/marcas-disponibles.dto';
-import { PaginatedResponseDto, BasePaginationDto } from '../../../shared/dtos/pagination.dto';
+import { PaginationService } from '@shared/services/pagination.service';
+import { AutoPaginationDto } from '@autos/application/dtos/pagination/auto-pagination.dto';
+import { MarcasDisponiblesResponseDto } from '@autos/application/dtos/marcas/marcas-disponibles.dto';
+import { PaginatedResponseDto, BasePaginationDto } from '@shared/dtos/pagination.dto';
 
 @Injectable()
 export class AutoQueryService {

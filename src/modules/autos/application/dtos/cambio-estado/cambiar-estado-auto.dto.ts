@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { EstadoAuto } from '../../../../domain/auto.enum';
+import { EstadoAuto } from '@autos/domain/auto.enum';
 
 export class CambiarEstadoAutoDto {
   @IsEnum(EstadoAuto, {
