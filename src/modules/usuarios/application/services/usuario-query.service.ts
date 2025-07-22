@@ -3,7 +3,7 @@ import { Usuario } from '../../domain/usuario.entity';
 import { IUsuarioRepository } from '../../domain/usuario.repository';
 import { UsuarioFilters } from '../../domain/interfaces/usuario-filters.interface';
 import { PaginationService } from '../../../shared/services/pagination.service';
-import { UsuarioPaginationDto } from '../dtos/usuarios/pagination/usuario-pagination.dto';
+import { UsuarioPaginationDto } from '../dtos/usuario-pagination.dto';
 import { PaginatedResponseDto, BasePaginationDto } from '../../../shared/dtos/pagination.dto';
 
 @Injectable()

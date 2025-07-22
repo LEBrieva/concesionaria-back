@@ -190,28 +190,25 @@ GET /publico/autos/favoritos
 ### 📁 Estructura Implementada
 ```
 src/modules/autos/
-├── application/
-│   ├── dtos/autos/
-│   │   ├── crear/ (sin esFavorito)
-│   │   ├── actualizar/ (sin esFavorito)
-│   │   └── favoritos/
-│   │       └── gestionar-favorito.dto.ts
-│   └── use-cases/autos/
-│       ├── gestionar-favorito.use-case.ts (solo ADMIN)
-│       ├── gestionar-favorito.use-case.spec.ts
-│       └── obtener-favoritos.use-case.ts
-├── domain/
-│   ├── auto.entity.ts (+ esFavorito)
-│   ├── auto.interfaces.ts (+ esFavorito)
-│   └── auto.repository.ts (+ métodos favoritos)
-└── infrastructure/
-    ├── controllers/
-    │   ├── auto.controller.ts (endpoints ADMIN)
-    │   └── autos-publico.controller.ts (banner clientes)
-    ├── mappers/
-    │   └── auto-to-prisma.mapper.ts (+ esFavorito)
-    └── prisma/
-        └── prisma-auto.repository.ts (+ métodos favoritos)
+├───application
+│   ├───dtos
+│   │   ├───actualizar
+│   │   ├───cambio-estado
+│   │   ├───crear
+│   │   ├───favoritos
+│   │   ├───imagenes
+│   │   ├───marcas
+│   │   └───pagination
+│   ├───mappers
+│   ├───services
+│   └───use-cases
+│       └───autos
+├───domain
+│   └───interfaces
+└───infrastructure
+    ├───controllers
+    ├───mappers
+    └───prisma
 ```
 
 ### 📊 Base de Datos

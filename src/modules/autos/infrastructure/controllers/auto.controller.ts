@@ -1,15 +1,32 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards, Query } from '@nestjs/common';
-import { CrearAutoDTO } from '@autos/application/dtos/autos/crear/crear-auto.dto';
-import { CrearAutoUseCase } from '@autos/application/use-cases/autos/crear-auto.use-case';
+import { 
+  Body, 
+  Controller, 
+  Delete, 
+  Get, 
+  Param, 
+  Patch, 
+  Post, 
+  Put, 
+  UseGuards, 
+  Query,
+  UseInterceptors,
+  UploadedFiles,
+  ParseUUIDPipe,
+  BadRequestException,
+  Logger
+} from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { CrearAutoDTO } from '@autos/application/dtos/crear/crear-auto.dto';
+import { CrearAutoUseCase } from '@autos/application/use-cases/crear-auto.use-case';
 import { AutoMapper } from '@autos/application/mappers/auto-to-http.mapper';
-import { AutoResponseDTO } from '@autos/application/dtos/autos/crear/crear-auto-response.dto';
-import { ActualizarAutoDTO } from '@autos/application/dtos/autos/actualizar/actualizar-auto.dto';
-import { ActualizarAutoUseCase } from '@autos/application/use-cases/autos/actualizar-auto.use-case';
-import { EliminarAutoUseCase } from '@autos/application/use-cases/autos/eliminar-auto.use-case';
-import { RestaurarAutoUseCase } from '@autos/application/use-cases/autos/restaurar-auto.use-case';
-import { CambiarEstadoAutoUseCase } from '../../application/use-cases/autos/cambiar-estado-auto.use-case';
-import { GestionarFavoritoUseCase } from '../../application/use-cases/autos/gestionar-favorito.use-case';
-import { ObtenerFavoritosUseCase } from '../../application/use-cases/autos/obtener-favoritos.use-case';
+import { AutoResponseDTO } from '@autos/application/dtos/crear/crear-auto-response.dto';
+import { ActualizarAutoDTO } from '@autos/application/dtos/actualizar/actualizar-auto.dto';
+import { ActualizarAutoUseCase } from '@autos/application/use-cases/actualizar-auto.use-case';
+import { EliminarAutoUseCase } from '@autos/application/use-cases/eliminar-auto.use-case';
+import { RestaurarAutoUseCase } from '@autos/application/use-cases/restaurar-auto.use-case';
+import { CambiarEstadoAutoUseCase } from '../../application/use-cases/cambiar-estado-auto.use-case';
+import { GestionarFavoritoUseCase } from '../../application/use-cases/gestionar-favorito.use-case';
+import { ObtenerFavoritosUseCase } from '../../application/use-cases/obtener-favoritos.use-case';
 import { AutoQueryService } from '@autos/application/services/auto-query.service';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/infrastructure/guards/roles.guard';
@@ -17,15 +34,23 @@ import { Roles } from '../../../auth/infrastructure/decorators/roles.decorator';
 import { CurrentUser } from '../../../auth/infrastructure/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../../../auth/domain/interfaces/authenticated-user.interface';
 import { RolUsuario } from '../../../usuarios/domain/usuario.enum';
-import { CambiarEstadoAutoDto, CambiarEstadoAutoResponseDto } from '../../application/dtos/autos/cambio-estado/cambiar-estado-auto.dto';
-import { GestionarFavoritoDto } from '../../application/dtos/autos/favoritos/gestionar-favorito.dto';
-import { AutoPaginationDto } from '../../application/dtos/autos/pagination/auto-pagination.dto';
-import { MarcasDisponiblesResponseDto } from '../../application/dtos/autos/marcas/marcas-disponibles.dto';
-import { PaginatedResponseDto, BasePaginationDto } from '../../../shared/dtos/pagination.dto';
+import { CambiarEstadoAutoDto, CambiarEstadoAutoResponseDto } from '../../application/dtos/cambio-estado/cambiar-estado-auto.dto';
+import { GestionarFavoritoDto } from '../../application/dtos/favoritos/gestionar-favorito.dto';
+import { AutoPaginationDto } from '../../application/dtos/pagination/auto-pagination.dto';
+import { MarcasDisponiblesResponseDto } from '../../application/dtos/marcas/marcas-disponibles.dto';
+import { PaginatedResponseDto } from '../../../shared/dtos/pagination.dto';
+import { SubirImagenesAutoUseCase } from '../../application/use-cases/subir-imagenes-auto.use-case';
+import { EliminarImagenAutoUseCase } from '../../application/use-cases/eliminar-imagen-auto.use-case';
+import { 
+  SubirImagenesResponseDto, 
+  EliminarImagenDto 
+} from '../../application/dtos/imagenes/imagenes-response.dto';
 
 @Controller('autos')
 @UseGuards(JwtAuthGuard)
 export class AutoController {
+  private readonly logger = new Logger(AutoController.name);
+
   constructor(
     private readonly crearAutoUseCase: CrearAutoUseCase,
     private readonly actualizarAutoUseCase: ActualizarAutoUseCase,
@@ -35,6 +60,8 @@ export class AutoController {
     private readonly gestionarFavoritoUseCase: GestionarFavoritoUseCase,
     private readonly obtenerFavoritosUseCase: ObtenerFavoritosUseCase,
     private readonly autoQueryService: AutoQueryService,
+    private readonly subirImagenesUseCase: SubirImagenesAutoUseCase,
+    private readonly eliminarImagenUseCase: EliminarImagenAutoUseCase,
   ) {}
 
   @Post()
@@ -203,5 +230,57 @@ export class AutoController {
   @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR)
   async getMarcasDisponibles(): Promise<MarcasDisponiblesResponseDto> {
     return this.autoQueryService.getMarcasDisponibles();
+  }
+
+  // 📸 ENDPOINTS DE IMÁGENES
+
+  /**
+   * Subir imágenes para un auto específico
+   * Las imágenes se organizan automáticamente en carpetas por matrícula
+   */
+  @Post(':id/imagenes')
+  @UseGuards(RolesGuard)
+  @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR)
+  @UseInterceptors(FilesInterceptor('imagenes', 10, {
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB límite máximo absoluto (seguridad)
+    },
+    fileFilter: (req, file, callback) => {
+      // Validar tipos de archivo permitidos
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.mimetype)) {
+        return callback(
+          new BadRequestException('Solo se permiten archivos de imagen (JPEG, PNG, WebP)'),
+          false
+        );
+      }
+      callback(null, true);
+    },
+  }))
+  async subirImagenes(
+    @Param('id', ParseUUIDPipe) autoId: string,
+    @UploadedFiles() files: Express.Multer.File[],
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<SubirImagenesResponseDto> {
+    this.logger.log(`Recibidas ${files?.length || 0} imágenes para auto ${autoId}`);
+    
+    // El exception filter maneja automáticamente cualquier error
+    return await this.subirImagenesUseCase.execute(autoId, files, user.id);
+  }
+
+  /**
+   * Eliminar una imagen específica de un auto
+   * Solo requiere el nombre del archivo, el path se construye automáticamente
+   */
+  @Delete(':id/imagenes')
+  @UseGuards(RolesGuard)
+  @Roles(RolUsuario.ADMIN, RolUsuario.VENDEDOR)
+  async eliminarImagen(
+    @Param('id', ParseUUIDPipe) autoId: string,
+    @Body() dto: EliminarImagenDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<{ mensaje: string }> {
+    // El exception filter maneja automáticamente cualquier error
+    return await this.eliminarImagenUseCase.execute(autoId, dto.fileName, user.id);
   }
 }

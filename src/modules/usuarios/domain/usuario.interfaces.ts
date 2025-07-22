@@ -1,4 +1,4 @@
-import { BaseProps } from 'src/modules/shared/interfaces/base-props.interface';
+import { BaseProps } from 'src/modules/shared/interfaces';
 import { RolUsuario } from './usuario.enum';
 
 export interface UsuarioProps extends BaseProps {

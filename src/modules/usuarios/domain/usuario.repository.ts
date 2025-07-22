@@ -1,5 +1,5 @@
 import { Usuario } from './usuario.entity';
-import { IBaseRepository } from '../../shared/interfaces/base-repository.interface';
+import { IBaseRepository } from '../../shared/interfaces';
 import { BasePaginationResult } from '../../shared/dtos/pagination.dto';
 import { UsuarioFilters } from './interfaces/usuario-filters.interface';
 

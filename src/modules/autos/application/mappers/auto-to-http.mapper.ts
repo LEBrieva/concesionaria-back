@@ -1,5 +1,5 @@
 import { Auto } from '../../domain/auto.entity';
-import { AutoResponseDTO } from '../dtos/autos/crear/crear-auto-response.dto';
+import { AutoResponseDTO } from '../dtos/crear/crear-auto-response.dto';
 
 export class AutoMapper {
   static toHttp(auto: Auto): AutoResponseDTO {
@@ -18,6 +18,19 @@ export class AutoMapper {
       transmision: auto.transmision,
       estado: auto.estado,
       color: auto.color,
+      imagenes: auto.imagenes,
+      equipamientoDestacado: auto.equipamientoDestacado,
+      caracteristicasGenerales: auto.caracteristicasGenerales,
+      exterior: auto.exterior,
+      confort: auto.confort,
+      seguridad: auto.seguridad,
+      interior: auto.interior,
+      entretenimiento: auto.entretenimiento,
+      esFavorito: auto.esFavorito,
+      observaciones: auto.observaciones,
+      createdAt: auto.createdAt,
+      updatedAt: auto.updatedAt,
+      active: auto.active,
     };
   }
 }

@@ -1,4 +1,4 @@
-import { BaseProps } from 'src/modules/shared/interfaces/base-props.interface';
+import { BaseProps } from 'src/modules/shared/interfaces';
 import { Color, EstadoAuto, Transmision, Marca } from '../auto.enum';
 
 export interface AutoProps extends BaseProps {

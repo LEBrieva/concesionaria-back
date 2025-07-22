@@ -21,7 +21,14 @@ La aplicación ahora soporta dos tipos de autenticación:
 2. Click en "Generate new private key"
 3. Descarga el archivo JSON con las credenciales
 
-### 3. Variables de entorno
+### 3. Configurar Firebase Storage
+
+1. En Firebase Console, ve a Storage
+2. Click en "Get started"
+3. Configura las reglas de seguridad (por ahora usa modo de prueba)
+4. Anota el nombre del bucket (normalmente es `tu-proyecto.appspot.com`)
+
+### 4. Variables de entorno
 
 Agrega estas variables a tu archivo `.env`:
 
@@ -30,11 +37,17 @@ Agrega estas variables a tu archivo `.env`:
 FIREBASE_PROJECT_ID="tu-proyecto-firebase"
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\ntu-private-key-aqui\n-----END PRIVATE KEY-----\n"
 FIREBASE_CLIENT_EMAIL="firebase-adminsdk-xxxxx@tu-proyecto.iam.gserviceaccount.com"
+
+# Firebase Storage (opcional, se infiere del PROJECT_ID si no se especifica)
+FIREBASE_STORAGE_BUCKET="tu-proyecto.appspot.com"
+
+# Configuración de imágenes (opcional)
+MAX_IMAGE_SIZE_MB=5
 ```
 
 **Nota**: El `FIREBASE_PRIVATE_KEY` debe incluir `\n` donde hay saltos de línea.
 
-### 4. Configuración del Frontend
+### 5. Configuración del Frontend
 
 El frontend debe configurar Firebase Client SDK:
 
@@ -199,6 +212,62 @@ graph TD
 - Un email que ya existe como ADMIN o VENDEDOR no puede usar Google Auth
 - Usar el login tradicional para estos usuarios
 
+## Sistema de Imágenes
+
+### Subir Imágenes de Autos
+
+```http
+POST /autos/:id/imagenes
+Authorization: Bearer <jwt-token>
+Content-Type: multipart/form-data
+
+# Form data:
+imagenes: [archivo1.jpg, archivo2.png, ...]
+```
+
+> **Nota**: Los endpoints de imágenes están integrados en el controlador principal de autos para mayor cohesión.
+
+**Respuesta:**
+```json
+{
+  "imagenes": [
+    {
+      "url": "https://storage.googleapis.com/tu-proyecto.appspot.com/autos/ABC123/mi-auto-deportivo-1703123456-abc12345.jpg",
+      "path": "autos/ABC123/mi-auto-deportivo-1703123456-abc12345.jpg",
+      "fileName": "mi-auto-deportivo-1703123456-abc12345.jpg",
+      "size": 245760,
+      "autoId": "uuid-del-auto"
+    }
+  ],
+  "total": 1,
+  "autoId": "uuid-del-auto",
+  "mensaje": "1 imagen(es) subida(s) exitosamente"
+}
+```
+
+### Características del Sistema de Imágenes
+
+- **Tipos permitidos**: JPEG, PNG, WebP
+- **Tamaño máximo**: 5MB por imagen (configurable solo por servidor via `MAX_IMAGE_SIZE_MB`)
+- **Límite simultáneo**: 10 imágenes por petición
+- **Validación**: Verificación de firmas de archivo para seguridad
+- **Nombres únicos**: Timestamp + UUID para evitar colisiones
+- **Organización**: Carpetas automáticas por matrícula (`autos/{matricula}/`)
+- **Nombres inteligentes**: Basados en el nombre original del archivo limpio
+
+### Eliminar Imágenes
+
+```http
+DELETE /autos/:id/imagenes
+Authorization: Bearer <jwt-token>
+Content-Type: application/json
+
+{
+  "autoId": "uuid-del-auto",
+  "filePath": "autos/ABC123/mi-auto-deportivo-1703123456-abc12345.jpg"
+}
+```
+
 ## Comandos Útiles
 
 ```bash
@@ -207,4 +276,9 @@ yarn start:dev
 
 # Ver logs de Firebase
 # Los logs mostrarán si Firebase está configurado correctamente
+
+# Probar subida de imagen (ejemplo con curl)
+curl -X POST http://localhost:3000/autos/uuid-del-auto/imagenes \
+  -H "Authorization: Bearer tu-jwt-token" \
+  -F "imagenes=@imagen.jpg"
 ``` 

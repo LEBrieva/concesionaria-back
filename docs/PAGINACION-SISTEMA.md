@@ -164,7 +164,7 @@ export interface AutoFilters extends BaseFilters {
 }
 ```
 
-#### 2. DTO de Paginación (`src/modules/autos/application/dtos/autos/pagination/auto-pagination.dto.ts`)
+#### 2. DTO de Paginación (`src/modules/autos/application/dtos/pagination/auto-pagination.dto.ts`)
 ```typescript
 export class AutoPaginationDto extends BasePaginationDto {
   @IsOptional()
@@ -457,7 +457,7 @@ src/modules/
 │   │   └── interfaces/
 │   │       └── auto-filters.interface.ts     # Filtros específicos
 │   ├── application/
-│   │   ├── dtos/autos/pagination/
+│   │   ├── dtos/pagination/
 │   │   │   └── auto-pagination.dto.ts        # DTO específico
 │   │   └── services/
 │   │       └── auto-query.service.ts         # Servicio extendido

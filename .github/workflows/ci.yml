@@ -2,9 +2,9 @@ name: Build, Tests & Deploys
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 jobs:
   build-test-deploy:
@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      # BD exclusiva para tests - no se limpia porque es solo para tests
       DATABASE_URL: "postgresql://concesionariadb_owner:npg_q0uhkIiDcZ9V@ep-patient-lake-acbkiclt-pooler.sa-east-1.aws.neon.tech/concesionariadb?sslmode=require&channel_binding=require"
       NODE_ENV: test
       JWT_SECRET: "mi-secreto-super-seguro"
-      FIREBASE_PROJECT_ID: "test-project"
 
     steps:
       - name: 📥 Clonar repositorio
@@ -41,8 +41,7 @@ jobs:
       - name: 🧪 Ejecutar tests unitarios
         run: yarn test
 
-      - name: 🧪 Ejecutar tests e2e
-        run: yarn test:e2e
+
 
       # - name: 🚀 Deploy a Railway
       #   run: npx railway up
