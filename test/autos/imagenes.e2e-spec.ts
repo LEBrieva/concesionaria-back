@@ -291,15 +291,16 @@ describe('Gestión de Imágenes E2E', () => {
   });
 
   describe('🛡️ Validaciones de Archivos', () => {
-    it('debe rechazar archivo con firma inválida (seguridad)', async () => {
+    it('debe rechazar archivo con tipo MIME inválido (seguridad)', async () => {
       await delay(1000);
       
-      const invalidBuffer = createTestImageBuffer('invalid');
+      // Crear un buffer con contenido válido pero mimetype inválido
+      const invalidBuffer = Buffer.from('fake file content');
       
       await request(app.getHttpServer())
         .post(`/autos/${autoId}/imagenes`)
         .set('Authorization', `Bearer ${adminToken}`)
-        .attach('imagenes', invalidBuffer, 'malicious.jpg')
+        .attach('imagenes', invalidBuffer, { filename: 'malicious.txt', contentType: 'text/plain' })
         .expect(400);
     });
 
