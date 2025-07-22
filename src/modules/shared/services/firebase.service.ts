@@ -15,25 +15,42 @@ export class FirebaseService implements OnModuleInit {
 
   onModuleInit() {
     if (!admin.apps.length) {
-      // Inicializar Firebase Admin SDK
-      // En producción, usar variables de entorno o archivo de credenciales
+      // Verificar si debemos usar Firebase Mock
+      const useFirebaseMock = 
+        process.env.NODE_ENV === 'test' || 
+        process.env.USE_FIREBASE_MOCK === 'true' ||
+        !process.env.FIREBASE_PROJECT_ID || 
+        !process.env.FIREBASE_PRIVATE_KEY || 
+        !process.env.FIREBASE_CLIENT_EMAIL;
+
+      if (useFirebaseMock) {
+        this.logger.warn('🧪 Firebase Admin SDK deshabilitado - usando modo mock/desarrollo');
+        return;
+      }
+
+      // Inicializar Firebase Admin SDK solo si tenemos credenciales válidas
       const serviceAccount = {
         projectId: process.env.FIREBASE_PROJECT_ID,
         privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       };
 
-      // Si no hay credenciales de Firebase, usar modo de desarrollo
-      if (!serviceAccount.projectId || !serviceAccount.privateKey || !serviceAccount.clientEmail) {
-        this.logger.warn('Firebase Admin SDK no configurado. Usando modo de desarrollo.');
+      // Validación adicional para asegurar que las credenciales son reales
+      if (!serviceAccount.privateKey || !serviceAccount.privateKey.includes('BEGIN PRIVATE KEY')) {
+        this.logger.warn('🧪 Firebase Private Key inválida - usando modo mock/desarrollo');
         return;
       }
 
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-      });
+      try {
+        admin.initializeApp({
+          credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+        });
 
-      this.logger.log('Firebase Admin SDK inicializado correctamente');
+        this.logger.log('✅ Firebase Admin SDK inicializado correctamente');
+      } catch (error) {
+        this.logger.error('❌ Error inicializando Firebase Admin SDK:', error.message);
+        this.logger.warn('🧪 Continuando en modo mock/desarrollo');
+      }
     }
   }
 
