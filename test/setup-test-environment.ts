@@ -11,9 +11,12 @@ import { execSync } from 'child_process';
 // 🚨 CONFIGURACIÓN CRÍTICA: BD exclusiva para tests
 console.log('\n🔧 Configurando entorno de test...');
 
-// 1. Configurar entorno para tests (FORZAR MOCK)
+// 1. FORZAR CONFIGURACIÓN DE TEST (sin importar environment)
 process.env.NODE_ENV = 'test';
 process.env.USE_FIREBASE_MOCK = 'true';
+process.env.FIREBASE_PROJECT_ID = 'test-project-mock';
+process.env.FIREBASE_STORAGE_BUCKET = 'test-bucket.appspot.com';
+console.log('🧪 Mock Firebase FORZADO para tests');
 
 // 2. Configurar BD de test
 setupTestDatabase();
