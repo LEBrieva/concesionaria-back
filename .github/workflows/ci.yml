@@ -2,20 +2,36 @@ name: Build, Tests & Deploys
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 jobs:
   build-test-deploy:
     name: Build, Tests & Deploys
     runs-on: ubuntu-latest
+    
+    # Usar environment basado en la rama
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || (github.ref == 'refs/heads/develop' && 'development' || 'testing') }}
 
     env:
+      # BD siempre de test para CI/CD
       DATABASE_URL: "postgresql://concesionariadb_owner:npg_q0uhkIiDcZ9V@ep-patient-lake-acbkiclt-pooler.sa-east-1.aws.neon.tech/concesionariadb?sslmode=require&channel_binding=require"
       NODE_ENV: test
       JWT_SECRET: "mi-secreto-super-seguro"
-      FIREBASE_PROJECT_ID: "test-project"
+      
+      # FORZAR USO DEL MOCK EN CI/CD (crítico para tests)
+      USE_FIREBASE_MOCK: "true"
+      
+      # Variables de Firebase (del environment, pero no se usarán por el mock)
+      FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID || 'test-project' }}
+      FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY || '' }}
+      FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL || '' }}
+      FIREBASE_STORAGE_BUCKET: ${{ vars.FIREBASE_STORAGE_BUCKET || '' }}
+      
+      # Configuración de imágenes
+      MAX_IMAGE_SIZE_MB: ${{ vars.MAX_IMAGE_SIZE_MB || '5' }}
+      MAX_FILES: ${{ vars.MAX_FILES || '10' }}
 
     steps:
       - name: 📥 Clonar repositorio
@@ -41,7 +57,7 @@ jobs:
       - name: 🧪 Ejecutar tests unitarios
         run: yarn test
 
-      - name: 🧪 Ejecutar tests e2e
+      - name: 🧪 Ejecutar tests e2e (con Firebase Mock)
         run: yarn test:e2e
 
       # - name: 🚀 Deploy a Railway

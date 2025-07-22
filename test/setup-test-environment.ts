@@ -11,13 +11,17 @@ import { execSync } from 'child_process';
 // 🚨 CONFIGURACIÓN CRÍTICA: BD exclusiva para tests
 console.log('\n🔧 Configurando entorno de test...');
 
-// 1. Configurar BD de test
+// 1. Configurar entorno para tests (FORZAR MOCK)
+process.env.NODE_ENV = 'test';
+process.env.USE_FIREBASE_MOCK = 'true';
+
+// 2. Configurar BD de test
 setupTestDatabase();
 
-// 2. Verificar seguridad
+// 3. Verificar seguridad
 verifyTestDatabase();
 
-// 3. Ejecutar migraciones en BD de test
+// 4. Ejecutar migraciones en BD de test
 console.log('🗄️ Ejecutando migraciones en BD de test...');
 try {
   execSync('npx prisma migrate deploy', { 
