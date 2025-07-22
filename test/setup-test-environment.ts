@@ -24,14 +24,28 @@ verifyTestDatabase();
 // 4. Ejecutar migraciones en BD de test
 console.log('🗄️ Ejecutando migraciones en BD de test...');
 try {
+  // Primero generar el cliente Prisma
+  console.log('📦 Generando cliente Prisma...');
+  execSync('npx prisma generate', { 
+    stdio: 'inherit',
+    env: { ...process.env, DATABASE_URL: TEST_DATABASE_URL }
+  });
+  
+  // Luego ejecutar migraciones
+  console.log('🗄️ Aplicando migraciones...');
   execSync('npx prisma migrate deploy', { 
-    stdio: 'pipe',
+    stdio: 'inherit',
     env: { ...process.env, DATABASE_URL: TEST_DATABASE_URL }
   });
   console.log('✅ Migraciones ejecutadas correctamente');
 } catch (error) {
   console.error('❌ Error ejecutando migraciones:', error.message);
-  // No lanzar error para que los tests continúen
+  console.error('Stack:', error.stack);
+  
+  // En CI/CD, fallar si no se pueden ejecutar migraciones
+  if (process.env.CI) {
+    throw new Error('Migraciones fallaron en CI/CD');
+  }
 }
 
 console.log('✅ Entorno de test configurado correctamente\n');

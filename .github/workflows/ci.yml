@@ -51,8 +51,18 @@ jobs:
       - name: 🛠 Compilar proyecto
         run: yarn build
 
+      - name: 🗄️ Generar cliente Prisma
+        run: npx prisma generate
+
       - name: 🗄️ Ejecutar migraciones de Prisma
         run: npx prisma migrate deploy
+        continue-on-error: false
+
+      - name: 🧪 Verificar configuración de test
+        run: |
+          echo "NODE_ENV=$NODE_ENV"
+          echo "USE_FIREBASE_MOCK=$USE_FIREBASE_MOCK"
+          echo "DATABASE_URL=$DATABASE_URL"
 
       - name: 🧪 Ejecutar tests unitarios
         run: yarn test

@@ -28,6 +28,7 @@ export class FirebaseStorageMockService {
     this.initializeConfig();
     this.logger.warn('🧪 USANDO FIREBASE STORAGE MOCK - Solo para tests/desarrollo');
     this.logger.warn(`🧪 Mock configurado con NODE_ENV=${process.env.NODE_ENV}, USE_FIREBASE_MOCK=${process.env.USE_FIREBASE_MOCK}`);
+    this.logger.warn(`🧪 Mock bucket: ${this.config.bucketName}, maxSize: ${this.config.maxSizeMB}MB`);
   }
 
   /**
