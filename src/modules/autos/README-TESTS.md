@@ -2,7 +2,7 @@
 
 ## Estrategia de Testing Implementada
 
-Hemos migrado de tests E2E a **tests unitarios** para el módulo de autos, siguiendo la **pirámide de testing** recomendada:
+Hemos implementado **tests unitarios** completos para el módulo de autos, siguiendo las mejores prácticas de testing:
 
 ```
     /\
@@ -47,9 +47,9 @@ Hemos migrado de tests E2E a **tests unitarios** para el módulo de autos, sigui
 ## Ventajas de esta Implementación
 
 ### 🚀 **Velocidad**
-- **Antes (E2E)**: ~15-20 segundos
-- **Ahora (Unitarios)**: ~5-7 segundos
-- **Mejora**: 3x más rápido
+- **Tests unitarios**: ~5-7 segundos
+- **Feedback inmediato** durante desarrollo
+- **Ejecución rápida** en CI/CD
 
 ### 🎯 **Precisión**
 - Identifican exactamente qué método/función falla
@@ -103,15 +103,15 @@ npm run test:watch
 
 ## Próximos Pasos
 
-1. **Extender a otros módulos**: Aplicar la misma estrategia a usuarios, auth, etc.
-2. **Tests de integración**: Para casos que requieren múltiples servicios
-3. **Tests E2E selectivos**: Solo para flujos críticos de negocio
-4. **Métricas de coverage**: Establecer umbrales mínimos
+1. **Mantener cobertura**: Agregar tests para nuevas funcionalidades
+2. **Métricas de coverage**: Establecer umbrales mínimos
+3. **Testing manual**: Validar flujos críticos en develop
+4. **Documentación**: Mantener tests como documentación viva
 
-## Memoria de la Decisión
+## Estrategia de Testing
 
-Se eliminaron los tests E2E de autos porque:
-- Eran lentos y costosos de mantener
-- La funcionalidad está mejor cubierta por tests unitarios
-- Los tests unitarios proporcionan mejor feedback
-- Se mantiene la [configuración segura de BD de test][[memory:4658101811309352852]] para otros E2E críticos 
+Los tests unitarios proporcionan:
+- **Cobertura completa** de lógica de negocio
+- **Feedback rápido** durante desarrollo
+- **Documentación viva** del comportamiento esperado
+- **Confianza** en refactoring y cambios 

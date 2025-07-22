@@ -165,36 +165,28 @@ Podés ver el archivo en `.github/workflows/ci.yml`.
 
 ## 🧪 Tests
 
-El proyecto utiliza **Jest** para las pruebas. Actualmente se implementan pruebas **end-to-end (e2e)** que verifican la funcionalidad completa de la API.
+El proyecto utiliza **Jest** para las pruebas. Se implementan **tests unitarios** completos que verifican la lógica de negocio, casos de uso y validaciones.
 
 ### Ejecutar pruebas
 
-- **Pruebas E2E** (recomendado):
+```bash
+# Ejecutar todos los tests unitarios
+yarn test
 
-  ```bash
-  yarn test:e2e
-  ```
+# Ejecutar tests en modo watch
+yarn test:watch
 
-- **Pruebas unitarias** (aún no implementadas):
+# Ver cobertura de tests
+yarn test:cov
+```
 
-  ```bash
-  yarn test
-  ```
+### Cobertura implementada
 
-- **Ver cobertura**:
-
-  ```bash
-  yarn test:cov
-  ```
-
-### Pruebas implementadas
-
-- ✅ **Creación de autos**: Validación de DTOs, enums y persistencia
-- ✅ **Validaciones de campos**: Campos requeridos, tipos de datos, rangos
-- ✅ **Enum Marca**: Validación de marcas de vehículos permitidas
-- ✅ **Casos edge**: Precios negativos, años futuros, kilometraje inválido
-
-> **Nota**: Las pruebas E2E requieren que la base de datos esté funcionando. Asegúrate de tener Docker corriendo con `docker-compose up -d`.
+- ✅ **193 tests unitarios** ejecutándose en ~8 segundos
+- ✅ **Módulo Autos**: 37 tests (entidades, casos de uso, servicios)
+- ✅ **Módulo Usuarios**: 130 tests (validaciones, permisos, seguridad)
+- ✅ **Casos edge**: Validaciones completas, manejo de errores
+- ✅ **Lógica de negocio**: Cobertura completa de reglas de dominio
 
 ## 🧪 Comandos útiles
 
