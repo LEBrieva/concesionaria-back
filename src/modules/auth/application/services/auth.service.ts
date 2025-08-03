@@ -1,9 +1,12 @@
-import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { IUsuarioRepository } from '../../../usuarios/domain/usuario.repository';
 import { PasswordService } from '../../../shared/services/password.service';
 import { AuthenticatedUser } from '../../domain/interfaces/authenticated-user.interface';
 import { JwtPayload } from '../../domain/interfaces/jwt-payload.interface';
+import { Usuario } from '../../../usuarios/domain/usuario.entity';
+import { RolUsuario } from '../../../usuarios/domain/usuario.enum';
+import { randomUUID } from 'crypto';
 
 export interface LoginResponse {
   access_token: string;
@@ -58,5 +61,46 @@ export class AuthService {
         rol: user.rol,
       },
     };
+  }
+
+  async register(registerData: { email: string; password: string; fullName: string }): Promise<LoginResponse> {
+    // Verificar si el usuario ya existe
+    const existingUser = await this.usuarioRepository.obtenerPorEmail(registerData.email);
+    if (existingUser) {
+      throw new ConflictException('El usuario ya existe');
+    }
+
+    // Hashear la contraseña
+    const hashedPassword = await this.passwordService.hashPassword(registerData.password);
+
+    // Separar nombre y apellido del fullName
+    const nameParts = registerData.fullName.trim().split(' ');
+    const nombre = nameParts[0];
+    const apellido = nameParts.slice(1).join(' ') || nombre;
+
+    // Crear el usuario
+    const nuevoUsuario = new Usuario({
+      id: randomUUID(),
+      nombre,
+      apellido,
+      email: registerData.email,
+      password: hashedPassword,
+      telefono: undefined,
+      rol: RolUsuario.CLIENTE,
+      createdBy: 'system',
+      updatedBy: 'system',
+    });
+
+    const usuarioCreado = await this.usuarioRepository.crear(nuevoUsuario);
+
+    // Crear el token y respuesta
+    const authenticatedUser: AuthenticatedUser = {
+      id: usuarioCreado.id,
+      email: usuarioCreado.email,
+      nombre: usuarioCreado.nombre,
+      rol: usuarioCreado.rol,
+    };
+
+    return this.login(authenticatedUser);
   }
 } 

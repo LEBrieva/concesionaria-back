@@ -6,6 +6,21 @@ import { AllExceptionsFilter } from './modules/shared/filters/all-exceptions.fil
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
+  // Configurar CORS
+  app.enableCors({
+    origin: [
+      'http://localhost:4200',
+      'http://localhost:3000',
+      'https://your-domain.com' // Agregar tu dominio de producción cuando lo tengas
+    ],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  });
+
+  // Configurar prefijo global para APIs
+  app.setGlobalPrefix('api');
+  
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

@@ -17,6 +17,19 @@ export class LoginDto {
   password: string;
 }
 
+export class RegisterDto {
+  @IsEmail({}, { message: 'Debe ser un email válido' })
+  email: string;
+
+  @IsString({ message: 'La contraseña debe ser una cadena de texto' })
+  @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
+  password: string;
+
+  @IsString({ message: 'El nombre debe ser una cadena de texto' })
+  @MinLength(2, { message: 'El nombre debe tener al menos 2 caracteres' })
+  fullName: string;
+}
+
 interface RequestWithUser extends Request {
   user: AuthenticatedUser;
 }
@@ -34,6 +47,13 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 intentos por minuto
   async login(@Request() req: RequestWithUser, @Body() loginDto: LoginDto): Promise<LoginResponse> {
     return this.authService.login(req.user);
+  }
+
+  @Post('register')
+  @HttpCode(HttpStatus.CREATED)
+  @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 registros por minuto
+  async register(@Body() registerDto: RegisterDto): Promise<LoginResponse> {
+    return this.authService.register(registerDto);
   }
 
   @Post('google')
