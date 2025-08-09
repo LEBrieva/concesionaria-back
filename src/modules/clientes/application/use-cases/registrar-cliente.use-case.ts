@@ -81,6 +81,7 @@ export class RegistrarClienteUseCase {
       id: clienteGuardado.id,
       nombre: clienteGuardado.nombre,
       apellido: clienteGuardado.apellido,
+      nombreCompleto: `${clienteGuardado.nombre} ${clienteGuardado.apellido}`,
       email: clienteGuardado.email,
       telefono: clienteGuardado.telefono,
       fechaNacimiento: clienteGuardado.fechaNacimiento,
@@ -92,7 +93,14 @@ export class RegistrarClienteUseCase {
       suscritoNewsletter: clienteGuardado.suscritoNewsletter,
       aceptaMarketing: clienteGuardado.aceptaMarketing,
       preferenciaContacto: clienteGuardado.preferenciaContacto,
+      ultimaActividad:
+        clienteGuardado.ultimaActividad || clienteGuardado.createdAt,
+      totalVistasAutos: clienteGuardado.totalVistasAutos || 0,
+      totalClicksAutos: clienteGuardado.totalClicksAutos || 0,
+      totalConsultas: clienteGuardado.totalConsultas || 0,
       createdAt: clienteGuardado.createdAt,
+      updatedAt: clienteGuardado.updatedAt,
+      active: clienteGuardado.active,
       message: 'Cliente registrado exitosamente. Por favor, verifica tu email.',
     };
   }

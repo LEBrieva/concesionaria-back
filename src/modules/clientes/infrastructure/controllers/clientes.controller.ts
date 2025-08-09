@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Get,
-  Put,
-  Body,
-  UseGuards,
-  Request,
-  Delete,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Get, Put, Body, UseGuards, Request } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { ObtenerPerfilUseCase } from '../../application/use-cases/obtener-perfil.use-case';
 import { ActualizarPerfilUseCase } from '../../application/use-cases/actualizar-perfil.use-case';
@@ -47,14 +37,5 @@ export class ClientesController {
   async cambiarPassword(@Request() req: any, @Body() dto: CambiarPasswordDto) {
     const clienteId = req.user.sub;
     return await this.cambiarPasswordUseCase.execute(clienteId, dto);
-  }
-
-  @Delete('perfil')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async eliminarCuenta(@Request() req: any) {
-    const clienteId = req.user.sub;
-    // TODO: Implementar caso de uso para eliminar cuenta
-    // Por ahora solo desactivamos la cuenta
-    return { message: 'Función no implementada aún' };
   }
 }
