@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards, Request, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, UseGuards, Request, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService, LoginResponse } from '../../application/services/auth.service';
@@ -6,6 +6,7 @@ import { AuthenticatedUser } from '../../domain/interfaces/authenticated-user.in
 import { GoogleAuthUseCase } from '../../application/use-cases/google-auth.use-case';
 import { GoogleAuthDto } from '../../application/dtos/google-auth.dto';
 import { FirebaseProtectionGuard } from '../guards/firebase-protection.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsEmail, IsString, MinLength } from 'class-validator';
 
 export class LoginDto {
@@ -62,5 +63,14 @@ export class AuthController {
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 intentos por minuto para Google Auth
   async googleAuth(@Body() googleAuthDto: GoogleAuthDto): Promise<LoginResponse> {
     return this.googleAuthUseCase.execute(googleAuthDto.firebaseToken);
+  }
+
+  @Get('check-status')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async checkStatus(@Request() req: RequestWithUser): Promise<LoginResponse> {
+    // El guard JWT ya validó el token y pobló req.user
+    // Solo necesitamos generar una nueva respuesta con el token renovado
+    return this.authService.login(req.user);
   }
 } 
