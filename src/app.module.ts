@@ -6,29 +6,35 @@ import { PrismaService } from './modules/shared/prisma.service';
 import { AutosModule } from './modules/autos/autos.module';
 import { UsuariosModule } from './modules/usuarios/usuarios.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { ClientesModule } from './modules/clientes/clientes.module';
 
 @Module({
   imports: [
-    ThrottlerModule.forRoot([{
-      name: 'short',
-      ttl: 1000, // 1 segundo
-      limit: 3, // 3 requests por segundo (global)
-    }, {
-      name: 'medium',
-      ttl: 10000, // 10 segundos
-      limit: 20, // 20 requests por 10 segundos
-    }, {
-      name: 'long',
-      ttl: 60000, // 1 minuto
-      limit: 100, // 100 requests por minuto
-    }]),
-    AutosModule, 
-    UsuariosModule, 
-    AuthModule
+    ThrottlerModule.forRoot([
+      {
+        name: 'short',
+        ttl: 1000, // 1 segundo
+        limit: 3, // 3 requests por segundo (global)
+      },
+      {
+        name: 'medium',
+        ttl: 10000, // 10 segundos
+        limit: 20, // 20 requests por 10 segundos
+      },
+      {
+        name: 'long',
+        ttl: 60000, // 1 minuto
+        limit: 100, // 100 requests por minuto
+      },
+    ]),
+    AutosModule,
+    UsuariosModule,
+    AuthModule,
+    ClientesModule,
   ],
   controllers: [],
   providers: [
-    AppService, 
+    AppService,
     PrismaService,
     {
       provide: APP_GUARD,

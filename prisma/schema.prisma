@@ -47,6 +47,7 @@ enum TipoAccion {
 enum TipoEntidad {
   AUTO
   USUARIO
+  CLIENTE
 }
 
 enum Marca {
@@ -98,68 +99,127 @@ enum Marca {
   OTRO
 }
 
+enum TipoAuto {
+  SEDAN
+  SUV
+  HATCHBACK
+  COUPE
+  CONVERTIBLE
+  PICKUP
+  WAGON
+  CROSSOVER
+  OTRO
+}
+
+enum PreferenciaContacto {
+  EMAIL
+  TELEFONO
+  WHATSAPP
+  NO_CONTACTAR
+}
+
+model Cliente {
+  id String @id @default(uuid())
+
+  // Información Personal
+  nombre          String
+  apellido        String
+  email           String    @unique
+  telefono        String?
+  fechaNacimiento DateTime?
+
+  // Autenticación (separada de Usuarios internos)
+  password          String? // Opcional para clientes que solo navegan
+  emailVerificado   Boolean @default(false)
+  tokenVerificacion String?
+
+  // Preferencias y Segmentación
+  rangoPresupuestoMin Int? // Presupuesto mínimo de interés
+  rangoPresupuestoMax Int? // Presupuesto máximo de interés
+  marcasInteres       Marca[] // Array de marcas de interés
+  tipoAutoInteres     TipoAuto[] // SUV, SEDAN, HATCHBACK, etc.
+
+  // Marketing y Comunicación
+  suscritoNewsletter  Boolean             @default(false)
+  aceptaMarketing     Boolean             @default(false)
+  preferenciaContacto PreferenciaContacto @default(EMAIL)
+
+  // Tracking y Analytics
+  ultimaActividad  DateTime @default(now())
+  totalVistasAutos Int      @default(0)
+  totalClicksAutos Int      @default(0)
+  totalConsultas   Int      @default(0)
+
+  // Auditoría
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  active    Boolean  @default(true)
+
+  @@map("clientes")
+}
+
 model Auto {
-  id                        String   @id @default(uuid())
-  nombre                    String
-  descripcion               String
-  observaciones             String
-  matricula                 String   @unique
-  marca                     Marca
-  modelo                    String
-  version                   String
-  ano                       Int
-  kilometraje               Int
-  precio                    Int
-  costo                     Int
-  color                     Color @default(BLANCO)
-  transmision               Transmision @default(MANUAL)
-  estado                    EstadoAuto @default(DISPONIBLE)
-  imagenes                  String[] // Array de URLs
-  equipamientoDestacado     String[]
-  caracteristicasGenerales  String[]
-  exterior                  String[]
-  confort                   String[]
-  seguridad                 String[]
-  interior                  String[]
-  entretenimiento           String[]
-  esFavorito                Boolean  @default(false)
-  createdAt                 DateTime @default(now())
-  updatedAt                 DateTime @updatedAt
-  createdBy                 String
-  updatedBy                 String
-  active                    Boolean  @default(true)
+  id                       String      @id @default(uuid())
+  nombre                   String
+  descripcion              String
+  observaciones            String
+  matricula                String      @unique
+  marca                    Marca
+  modelo                   String
+  version                  String
+  ano                      Int
+  kilometraje              Int
+  precio                   Int
+  costo                    Int
+  color                    Color       @default(BLANCO)
+  transmision              Transmision @default(MANUAL)
+  estado                   EstadoAuto  @default(DISPONIBLE)
+  imagenes                 String[] // Array de URLs
+  equipamientoDestacado    String[]
+  caracteristicasGenerales String[]
+  exterior                 String[]
+  confort                  String[]
+  seguridad                String[]
+  interior                 String[]
+  entretenimiento          String[]
+  esFavorito               Boolean     @default(false)
+  createdAt                DateTime    @default(now())
+  updatedAt                DateTime    @updatedAt
+  createdBy                String
+  updatedBy                String
+  active                   Boolean     @default(true)
 }
 
 model Usuario {
-  id        String   @id @default(uuid())
+  id        String     @id @default(uuid())
   nombre    String
   apellido  String
-  email     String   @unique
+  email     String     @unique
   password  String
   telefono  String?
-  rol       RolUsuario  @default(CLIENTE)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  rol       RolUsuario @default(CLIENTE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   createdBy String
   updatedBy String
-  active    Boolean  @default(true)
+  active    Boolean    @default(true)
 }
 
 model Historial {
-  id              String      @id @default(uuid())
-  entidadId       String      // ID de la entidad afectada (Auto, Usuario, etc.)
-  tipoEntidad     TipoEntidad // Tipo de entidad (AUTO, USUARIO)
-  tipoAccion      TipoAccion  // Tipo de acción realizada
-  campoAfectado   String?     // Campo específico que cambió (opcional)
-  valorAnterior   String?     // Valor anterior del campo (opcional)
-  valorNuevo      String?     // Nuevo valor del campo (opcional)
-  observaciones   String?     // Observaciones adicionales (opcional)
-  metadata        Json?       // Metadata adicional en formato JSON
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  createdBy       String      // ID del usuario que realizó la acción
-  updatedBy       String
-  active          Boolean     @default(true)
+  id            String      @id @default(uuid())
+  entidadId     String // ID de la entidad afectada (Auto, Usuario, etc.)
+  tipoEntidad   TipoEntidad // Tipo de entidad (AUTO, USUARIO)
+  tipoAccion    TipoAccion // Tipo de acción realizada
+  campoAfectado String? // Campo específico que cambió (opcional)
+  valorAnterior String? // Valor anterior del campo (opcional)
+  valorNuevo    String? // Nuevo valor del campo (opcional)
+  observaciones String? // Observaciones adicionales (opcional)
+  metadata      Json? // Metadata adicional en formato JSON
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  createdBy     String // ID del usuario que realizó la acción
+  updatedBy     String
+  active        Boolean     @default(true)
 
   // Índices para optimizar consultas
   @@index([entidadId, tipoEntidad])
@@ -167,5 +227,3 @@ model Historial {
   @@index([createdAt])
   @@map("historial")
 }
-
-
